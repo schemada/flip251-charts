@@ -275,13 +275,6 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
       </div>
     </div>
     <div class="ctl">
-      <span class="cap">Meter</span>
-      <div class="rocker" role="group" aria-label="Meter">
-        <button id="t-44" aria-pressed="true">4/4</button>
-        <button id="t-34" aria-pressed="false">3/4 Waltz</button>
-      </div>
-    </div>
-    <div class="ctl">
       <span class="cap">Each key</span>
       <div class="rocker" role="group" aria-label="Times through each key">
         <button id="r-1" aria-pressed="true">Once</button>
@@ -366,7 +359,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
   };
   const state = {
     prog: "251", minor: false, short: false, turn: "hold", order: "cycle", start: 0, mix: false,
-    domV: "ext", domVI: "ext", reps: 1, meter: 4, style: "Medium Swing", pdf: "dark",
+    domV: "ext", domVI: "ext", reps: 1, style: "Medium Swing", pdf: "dark",
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
   try {
@@ -380,23 +373,20 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     if ([1,2].includes(s.reps)) state.reps = s.reps;
     if (typeof s.style === "string") state.style = s.style;
     if (["dark","light"].includes(s.pdf)) state.pdf = s.pdf;
-    if (s.meter === 3 || s.meter === 4) state.meter = s.meter;
     const ok = a => Array.isArray(a) && a.length && a.every(p => Number.isInteger(p) && p >= 0 && p < 12);
     if (s.sel && ok(s.sel.major)) state.sel.major = s.sel.major;
     if (s.sel && ok(s.sel.minor)) state.sel.minor = s.sel.minor;
   } catch (e) {}
   function save() {
     try {
-      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, meter, style, pdf, sel } = state;
-      localStorage.setItem("chart251", JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, meter, style, pdf, sel }));
+      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel } = state;
+      localStorage.setItem("chart251", JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel }));
     } catch (e) {}
   }
   const isMinor = () => state.minor && PROGS[state.prog].minor;     // backdoor and iii–VI–ii–V are major-key sounds
   const Q = () => isMinor() ? "minor" : "major";
   const sel = () => state.sel[Q()];
-  // In 3/4 a chord never shares a bar: Short is one bar per chord (the 4/4 long shape), Long is two bars per chord.
-  const waltz = () => state.meter === 3;
-  const barsPerKey = () => { const b = PROGS[state.prog].bars; return waltz() ? (state.short ? b[0] : b[0] * 2) : b[state.short ? 1 : 0]; };
+  const barsPerKey = () => PROGS[state.prog].bars[state.short ? 1 : 0];
 
   function keyFor(pc, minor) {
     if (!minor && pc === 6) {
@@ -424,18 +414,12 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
 
   // one key's bars as iReal chord tokens, e.g. [["D-7"], ["G13"], ["C^7"], ["x"]]
   function barsFor(pc, idx) {
-    if (waltz()) {
-      const one = barsFor44(pc, idx, true);
-      return state.short ? one : one.flatMap(b => [b, ["x"]]);
-    }
-    return barsFor44(pc, idx, !state.short);
-  }
-  function barsFor44(pc, idx, long) {
     const minor = isMinor(), key = keyFor(pc, minor);
     const pick = state.mix && mix[idx] ? mix[idx] : { v: state.domV, vi: state.domVI };
     const r = (steps, semis) => ireal(spell(key, steps, semis));
     const ii = r(1, 2) + (minor ? "h7" : "-7"), V = r(4, 7) + domQ(pick.v, minor);
     const I = r(0, 0) + (minor ? "-6" : "^7");
+    const long = !state.short;
     switch (state.prog) {
       case "25":
         return long ? [[ii], [V]] : [[ii, V]];
@@ -493,12 +477,12 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     return order.map((pc, k) => {
       const body = barsFor(pc, k).map((b, i) => (i === 0 ? "<" + keyName(pc) + ">" : "") + cell(b)).join("|");
       const last = k === order.length - 1;
-      return open + (k === 0 ? (waltz() ? "T34" : "T44") : "") + body + (last && state.reps === 1 ? "Z" : close);
+      return open + (k === 0 ? "T44" : "") + body + (last && state.reps === 1 ? "Z" : close);
     }).join("");
   }
   function defaultTitle() {
     const p = PROGS[state.prog];
-    return p.name + (p.minor ? (state.minor ? " Minor" : " Major") : "") + " " + (state.short ? "Short" : "Long") + (waltz() ? " Waltz" : "") + " (" + (state.order === "cycle" ? "Cycle" : "Shuffled") + ")";
+    return p.name + (p.minor ? (state.minor ? " Minor" : " Major") : "") + " " + (state.short ? "Short" : "Long") + " (" + (state.order === "cycle" ? "Cycle" : "Shuffled") + ")";
   }
   function chartTitle() { return ($("title").value.trim() || defaultTitle()).replace(/=/g, "-"); }
   function url() {
@@ -566,10 +550,8 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     $("qCtl").classList.toggle("off", !P.minor);
     $("qCap").textContent = P.minor ? "Quality" : "Quality (major only)";
     press("l-long", !state.short); press("l-short", state.short);
-    const nb = waltz() ? [n[0] * 2, n[0]] : n;
-    $("l-long").textContent = "Long · " + nb[0];
-    $("l-short").textContent = "Short · " + nb[1];
-    press("t-44", !waltz()); press("t-34", waltz());
+    $("l-long").textContent = "Long · " + n[0];
+    $("l-short").textContent = "Short · " + n[1];
     press("t-hold", state.turn === "hold"); press("t-vi", state.turn === "vi");
     $("turnCtl").classList.toggle("off", !(state.prog === "251" && !state.short));
     press("o-random", state.order === "random"); press("o-cycle", state.order === "cycle");
@@ -606,8 +588,6 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
   $("m-mix").onclick = () => { state.mix = true; rollMix(); changed(false); };
   $("r-1").onclick = () => { state.reps = 1; changed(false); };
   $("r-2").onclick = () => { state.reps = 2; changed(false); };
-  $("t-44").onclick = () => { state.meter = 4; changed(false); };
-  $("t-34").onclick = () => { state.meter = 3; changed(false); };
   $("pdf-dark").onclick = () => { state.pdf = "dark"; save(); render(); };
   $("pdf-light").onclick = () => { state.pdf = "light"; save(); render(); };
   $("style").onchange = e => { state.style = e.target.value; changed(false); };
@@ -786,7 +766,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     c.textAlign = "center"; c.fillStyle = PDF.ink; c.font = "700 26px " + FLAP;
     c.fillText(chartTitle(), W / 2, M + 22);
     c.textAlign = "left"; c.fillStyle = PDF.dim; c.font = "500 12px " + MONO;
-    c.fillText("(" + state.style + (waltz() ? ", 3/4" : "") + ")", M, M + 42);
+    c.fillText("(" + state.style + ")", M, M + 42);
     c.textAlign = "right"; c.fillText("251 Charts" + (pages > 1 ? "  ·  " + (pageIdx + 1) + "/" + pages : ""), W - M, M + 42);
     c.textAlign = "left";
     const top = M + 62, avail = H - top - M - 24;
@@ -818,7 +798,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = "600 9.5px " + MONO;
     const bars = order.length * barsPerKey() * state.reps;
-    c.fillText((order.length + " keys · " + bars + " bars · " + (waltz() ? "3/4 · " : "") + state.style).toUpperCase(), M, 42);
+    c.fillText((order.length + " keys · " + bars + " bars · " + state.style).toUpperCase(), M, 42);
     drawLines(c, lines, M, top, barW, lineH, S, Math.max(9, S * .42), lines.length - 1, 0);
     return cv.toDataURL("image/png");
   }
