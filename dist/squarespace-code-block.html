@@ -170,7 +170,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   .case { gap: 14px; }
 }
 &lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div class=&quot;case&quot;&gt;
-  &lt;div class=&quot;plate&quot;&gt;&lt;span class=&quot;brand&quot;&gt;ii &amp;#183; V &amp;#183; I &amp;#8594; iReal&lt;/span&gt;&lt;span class=&quot;model&quot;&gt;CHART 251&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;plate&quot;&gt;&lt;span class=&quot;brand&quot;&gt;ii &amp;#183; V &amp;#183; I &amp;#8594; iReal&lt;/span&gt;&lt;span class=&quot;model&quot;&gt;251 CHARTS&lt;/span&gt;&lt;/div&gt;
   &lt;p class=&quot;lede&quot;&gt;Design a custom exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF.&lt;/p&gt;
 
   &lt;div class=&quot;grid&quot; aria-label=&quot;Settings&quot;&gt;
@@ -238,6 +238,13 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         &lt;button id=&quot;dvi-ext&quot; aria-pressed=&quot;true&quot;&gt;13&lt;/button&gt;
         &lt;button id=&quot;dvi-b9&quot; aria-pressed=&quot;false&quot;&gt;7&lt;span class=&quot;sym&quot;&gt;&amp;#9837;&lt;/span&gt;9&lt;/button&gt;
         &lt;button id=&quot;dvi-alt&quot; aria-pressed=&quot;false&quot;&gt;7alt&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;ctl&quot;&gt;
+      &lt;span class=&quot;cap&quot;&gt;Meter&lt;/span&gt;
+      &lt;div class=&quot;rocker&quot; role=&quot;group&quot; aria-label=&quot;Meter&quot;&gt;
+        &lt;button id=&quot;t-44&quot; aria-pressed=&quot;true&quot;&gt;4/4&lt;/button&gt;
+        &lt;button id=&quot;t-34&quot; aria-pressed=&quot;false&quot;&gt;3/4 Waltz&lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot;&gt;
@@ -325,7 +332,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   };
   const state = {
     prog: &quot;251&quot;, minor: false, short: false, turn: &quot;hold&quot;, order: &quot;cycle&quot;, start: 0, mix: false,
-    domV: &quot;ext&quot;, domVI: &quot;ext&quot;, reps: 1, style: &quot;Medium Swing&quot;, pdf: &quot;dark&quot;,
+    domV: &quot;ext&quot;, domVI: &quot;ext&quot;, reps: 1, meter: 4, style: &quot;Medium Swing&quot;, pdf: &quot;dark&quot;,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
   try {
@@ -339,20 +346,23 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if ([1,2].includes(s.reps)) state.reps = s.reps;
     if (typeof s.style === &quot;string&quot;) state.style = s.style;
     if ([&quot;dark&quot;,&quot;light&quot;].includes(s.pdf)) state.pdf = s.pdf;
+    if (s.meter === 3 || s.meter === 4) state.meter = s.meter;
     const ok = a =&gt; Array.isArray(a) &amp;&amp; a.length &amp;&amp; a.every(p =&gt; Number.isInteger(p) &amp;&amp; p &gt;= 0 &amp;&amp; p &lt; 12);
     if (s.sel &amp;&amp; ok(s.sel.major)) state.sel.major = s.sel.major;
     if (s.sel &amp;&amp; ok(s.sel.minor)) state.sel.minor = s.sel.minor;
   } catch (e) {}
   function save() {
     try {
-      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel } = state;
-      localStorage.setItem(&quot;chart251&quot;, JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel }));
+      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, meter, style, pdf, sel } = state;
+      localStorage.setItem(&quot;chart251&quot;, JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, meter, style, pdf, sel }));
     } catch (e) {}
   }
   const isMinor = () =&gt; state.minor &amp;&amp; PROGS[state.prog].minor;     // backdoor and iii&amp;#8211;VI&amp;#8211;ii&amp;#8211;V are major-key sounds
   const Q = () =&gt; isMinor() ? &quot;minor&quot; : &quot;major&quot;;
   const sel = () =&gt; state.sel[Q()];
-  const barsPerKey = () =&gt; PROGS[state.prog].bars[state.short ? 1 : 0];
+  // In 3/4 a chord never shares a bar: Short is one bar per chord (the 4/4 long shape), Long is two bars per chord.
+  const waltz = () =&gt; state.meter === 3;
+  const barsPerKey = () =&gt; { const b = PROGS[state.prog].bars; return waltz() ? (state.short ? b[0] : b[0] * 2) : b[state.short ? 1 : 0]; };
 
   function keyFor(pc, minor) {
     if (!minor &amp;&amp; pc === 6) {
@@ -380,12 +390,18 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
 
   // one key&#x27;s bars as iReal chord tokens, e.g. [[&quot;D-7&quot;], [&quot;G13&quot;], [&quot;C^7&quot;], [&quot;x&quot;]]
   function barsFor(pc, idx) {
+    if (waltz()) {
+      const one = barsFor44(pc, idx, true);
+      return state.short ? one : one.flatMap(b =&gt; [b, [&quot;x&quot;]]);
+    }
+    return barsFor44(pc, idx, !state.short);
+  }
+  function barsFor44(pc, idx, long) {
     const minor = isMinor(), key = keyFor(pc, minor);
     const pick = state.mix &amp;&amp; mix[idx] ? mix[idx] : { v: state.domV, vi: state.domVI };
     const r = (steps, semis) =&gt; ireal(spell(key, steps, semis));
     const ii = r(1, 2) + (minor ? &quot;h7&quot; : &quot;-7&quot;), V = r(4, 7) + domQ(pick.v, minor);
     const I = r(0, 0) + (minor ? &quot;-6&quot; : &quot;^7&quot;);
-    const long = !state.short;
     switch (state.prog) {
       case &quot;25&quot;:
         return long ? [[ii], [V]] : [[ii, V]];
@@ -443,18 +459,18 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     return order.map((pc, k) =&gt; {
       const body = barsFor(pc, k).map((b, i) =&gt; (i === 0 ? &quot;&lt;&quot; + keyName(pc) + &quot;&gt;&quot; : &quot;&quot;) + cell(b)).join(&quot;|&quot;);
       const last = k === order.length - 1;
-      return open + (k === 0 ? &quot;T44&quot; : &quot;&quot;) + body + (last &amp;&amp; state.reps === 1 ? &quot;Z&quot; : close);
+      return open + (k === 0 ? (waltz() ? &quot;T34&quot; : &quot;T44&quot;) : &quot;&quot;) + body + (last &amp;&amp; state.reps === 1 ? &quot;Z&quot; : close);
     }).join(&quot;&quot;);
   }
   function defaultTitle() {
     const p = PROGS[state.prog];
-    return p.name + (p.minor ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;) + &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) + &quot; (&quot; + (state.order === &quot;cycle&quot; ? &quot;Cycle&quot; : &quot;Shuffled&quot;) + &quot;)&quot;;
+    return p.name + (p.minor ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;) + &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) + (waltz() ? &quot; Waltz&quot; : &quot;&quot;) + &quot; (&quot; + (state.order === &quot;cycle&quot; ? &quot;Cycle&quot; : &quot;Shuffled&quot;) + &quot;)&quot;;
   }
   function chartTitle() { return ($(&quot;title&quot;).value.trim() || defaultTitle()).replace(/=/g, &quot;-&quot;); }
   function url() {
     const k = ireal(spell(keyFor(order[0], isMinor()), 0, 0)) + (isMinor() ? &quot;-&quot; : &quot;&quot;);
-    // iReal Pro shows the composer as &quot;First Last&quot; from &quot;Last First&quot;, so this reads &quot;Flip 251&quot; in the app
-    const fields = [chartTitle(), &quot;251 Flip&quot;, state.style, k, &quot;n&quot;, music()];
+    // iReal Pro shows the composer as &quot;First Last&quot; from &quot;Last First&quot;, so this reads &quot;251 Charts&quot; in the app
+    const fields = [chartTitle(), &quot;Charts 251&quot;, state.style, k, &quot;n&quot;, music()];
     return &quot;irealbook://&quot; + fields.map(encodeURIComponent).join(&quot;=&quot;);
   }
 
@@ -516,8 +532,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     $(&quot;qCtl&quot;).classList.toggle(&quot;off&quot;, !P.minor);
     $(&quot;qCap&quot;).textContent = P.minor ? &quot;Quality&quot; : &quot;Quality (major only)&quot;;
     press(&quot;l-long&quot;, !state.short); press(&quot;l-short&quot;, state.short);
-    $(&quot;l-long&quot;).textContent = &quot;Long &amp;#183; &quot; + n[0];
-    $(&quot;l-short&quot;).textContent = &quot;Short &amp;#183; &quot; + n[1];
+    const nb = waltz() ? [n[0] * 2, n[0]] : n;
+    $(&quot;l-long&quot;).textContent = &quot;Long &amp;#183; &quot; + nb[0];
+    $(&quot;l-short&quot;).textContent = &quot;Short &amp;#183; &quot; + nb[1];
+    press(&quot;t-44&quot;, !waltz()); press(&quot;t-34&quot;, waltz());
     press(&quot;t-hold&quot;, state.turn === &quot;hold&quot;); press(&quot;t-vi&quot;, state.turn === &quot;vi&quot;);
     $(&quot;turnCtl&quot;).classList.toggle(&quot;off&quot;, !(state.prog === &quot;251&quot; &amp;&amp; !state.short));
     press(&quot;o-random&quot;, state.order === &quot;random&quot;); press(&quot;o-cycle&quot;, state.order === &quot;cycle&quot;);
@@ -554,6 +572,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $(&quot;m-mix&quot;).onclick = () =&gt; { state.mix = true; rollMix(); changed(false); };
   $(&quot;r-1&quot;).onclick = () =&gt; { state.reps = 1; changed(false); };
   $(&quot;r-2&quot;).onclick = () =&gt; { state.reps = 2; changed(false); };
+  $(&quot;t-44&quot;).onclick = () =&gt; { state.meter = 4; changed(false); };
+  $(&quot;t-34&quot;).onclick = () =&gt; { state.meter = 3; changed(false); };
   $(&quot;pdf-dark&quot;).onclick = () =&gt; { state.pdf = &quot;dark&quot;; save(); render(); };
   $(&quot;pdf-light&quot;).onclick = () =&gt; { state.pdf = &quot;light&quot;; save(); render(); };
   $(&quot;style&quot;).onchange = e =&gt; { state.style = e.target.value; changed(false); };
@@ -732,8 +752,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.textAlign = &quot;center&quot;; c.fillStyle = PDF.ink; c.font = &quot;700 26px &quot; + FLAP;
     c.fillText(chartTitle(), W / 2, M + 22);
     c.textAlign = &quot;left&quot;; c.fillStyle = PDF.dim; c.font = &quot;500 12px &quot; + MONO;
-    c.fillText(&quot;(&quot; + state.style + &quot;)&quot;, M, M + 42);
-    c.textAlign = &quot;right&quot;; c.fillText(&quot;Flip 251&quot; + (pages &gt; 1 ? &quot;  &amp;#183;  &quot; + (pageIdx + 1) + &quot;/&quot; + pages : &quot;&quot;), W - M, M + 42);
+    c.fillText(&quot;(&quot; + state.style + (waltz() ? &quot;, 3/4&quot; : &quot;&quot;) + &quot;)&quot;, M, M + 42);
+    c.textAlign = &quot;right&quot;; c.fillText(&quot;251 Charts&quot; + (pages &gt; 1 ? &quot;  &amp;#183;  &quot; + (pageIdx + 1) + &quot;/&quot; + pages : &quot;&quot;), W - M, M + 42);
     c.textAlign = &quot;left&quot;;
     const top = M + 62, avail = H - top - M - 24;
     const used = Math.min(perPage, lines.length - pageIdx * perPage);
@@ -764,7 +784,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = &quot;600 9.5px &quot; + MONO;
     const bars = order.length * barsPerKey() * state.reps;
-    c.fillText((order.length + &quot; keys &amp;#183; &quot; + bars + &quot; bars &amp;#183; &quot; + state.style).toUpperCase(), M, 42);
+    c.fillText((order.length + &quot; keys &amp;#183; &quot; + bars + &quot; bars &amp;#183; &quot; + (waltz() ? &quot;3/4 &amp;#183; &quot; : &quot;&quot;) + state.style).toUpperCase(), M, 42);
     drawLines(c, lines, M, top, barW, lineH, S, Math.max(9, S * .42), lines.length - 1, 0);
     return cv.toDataURL(&quot;image/png&quot;);
   }
@@ -774,7 +794,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     PDF = LOOKS[state.pdf] || LOOKS.dark;
     const lines = chartLines(), perPage = 12, pages = Math.max(1, Math.ceil(lines.length / perPage));
     const doc = new window.jspdf.jsPDF({ unit: &quot;pt&quot;, format: &quot;letter&quot;, compress: true });
-    doc.setProperties({ title: chartTitle(), subject: &quot;ii-V-I practice chart&quot;, creator: &quot;Flip 251&quot; });
+    doc.setProperties({ title: chartTitle(), subject: &quot;ii-V-I practice chart&quot;, creator: &quot;251 Charts&quot; });
     for (let p = 0; p &lt; pages; p++) {
       if (p) doc.addPage();
       const cv = drawPage(lines, p, pages, perPage, 3);

@@ -23,6 +23,8 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   Backdoor iv–♭VII7–I (4 / 2, major only, bar 4 holds I). Order in the picker: ii–V–I, ii–V, iii–VI–ii–V, Backdoor.
 - Bar 4 of long ii–V–I: hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;
   "Random mix" picks a type per dominant and greys out those two selectors.
+- Meter: 4/4 or 3/4 Waltz (`T34`). In 3/4 a chord never shares a bar: Short = one bar per chord (the 4/4 long shape),
+  Long = two bars per chord, the second written as a bar-repeat. Default title adds "Waltz".
 - Order: Cycle of 4ths from "Start on" (greyed out, not hidden, when Shuffle is on) or Shuffle. "Shuffle again" while
   cycling picks a new start key. Default title says "(Cycle)" or "(Shuffled)" — never "Shuffle" (sounds like a groove).
 
@@ -35,7 +37,8 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
 - The preview is a canvas-drawn **image** (press-and-hold to save), drawn by the same code as the PDF.
 - Flats and sharps are drawn as vector shapes (thin stem, open bowl; thin uprights, thick rising bars) sized from the
   letter's cap height — not font glyphs — so they look the same everywhere.
-- iReal composer field is `251 Flip` so iReal displays "Flip 251". Legacy `irealbook://` links (no tempo field).
+- The app's name is **251 Charts** (home screen, top-right plate, PDF header). iReal composer field is `Charts 251` so
+  iReal displays "251 Charts". Legacy `irealbook://` links (no tempo field).
 
 **Copy and layout**
 - Intro: "Design a custom exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF."
