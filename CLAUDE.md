@@ -21,9 +21,19 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   E♯/B♯/C♭/F♭ and double accidentals are respelled (so D♯ major's ii shows as F–7). There are no flat-key/sharp-key presets.
 - Qualities in iReal syntax: ii `-7` (major) / `h7` (minor), I `^7` / i `-6`, dominants `7`, `13`, `7b9`, `7alt`.
   Minor keys never get `13` (a natural 13 fights the key) — "13" falls back to `7` there.
-- Progressions: ii–V–I (long 4 bars: ii|V|I|bar 4, short 2), ii–V (2 / 1), iii–VI–ii–V (4 / 2, major only),
-  Backdoor iv–♭VII7–I (4 / 2, major only, bar 4 holds I). Order in the picker: ii–V–I, ii–V, iii–VI–ii–V, Backdoor.
-- Bar 4 of long ii–V–I: hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;
+- Progressions are one grouped menu (keep this order and grouping):
+  ii–V–I: ii–V–I, ii–V. ii–V variations: Tritone sub ii–♭II7–I, Major ii–V → minor i, Minor ii–V → major I,
+  Backdoor iv–♭VII7–I. Turnarounds: I–VI–ii–V, iii–VI–ii–V, iii–♭iii°–ii–V, I–♯I°–ii–V, Lady Bird
+  (I–♭III7–♭VImaj7–♭II7). Drills: Dominants only (one dominant per key; the Order menu moves it — never call these
+  "dominant chains"), One chord quality (Δ7, –7, ø7, °7, –6, –Δ7, 7sus4, Δ7♯11; for random-root practice).
+  Your own: Custom progression. Quality (Major/Minor) applies to ii–V–I, ii–V, tritone sub and custom; the rest
+  are fixed. Drills have no key names (the chord names its root). No colour moves or whole forms (blues, rhythm
+  changes) — the owner left those out for now.
+- Custom progression: roman numerals over the key, always counted from the major scale; bars split by "|",
+  up to 4 chords a bar, up to 16 bars, "%" repeats a bar. Bare numerals: lowercase –7 (vii ø7), uppercase 7,
+  except I and IV maj7. Plain 7ths follow the Dominants setting; any other quality is used as written. Unknown
+  tokens are skipped and listed under the box. There are no premade custom examples.
+- Bar 4 of long ii–V–I (and its tritone-sub and major/minor variants): hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;
   "Random mix" picks a type per dominant and greys out those two selectors.
 - Order (a menu): Cycle of 4ths (default), Down whole steps, Down half steps, Up minor 3rds, Up major 3rds (Coltrane),
   Shuffled. All but Shuffled walk from "Start on" (greyed out, not hidden, for Shuffled). When a walk closes up before
@@ -32,10 +42,17 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   ends with "(Cycle)", "(Whole Steps)", "(Half Steps)", "(Minor 3rds)", "(Major 3rds)" or "(Shuffled)" — never
   "Shuffle" (sounds like a groove).
 
+- Surprise me: random progression (not Custom), quality, length, bar 4, order, start, dominants; keeps keys,
+  repeats, style, look, key names and the teaching note. Saved recipes: the whole setup (plus the title) stored on
+  the device under the chart title; picking one reloads it with fresh keys; ✕ deletes the selected one.
+
 **Chart / PDF**
 - Four bars per line; each key's name sits **under its first bar** (iReal style), never in a side column.
 - Barlines: single for every measure (same ink as doubles, just thinner), double at each key change, repeat signs when
   "Twice" (`{ }` in iReal) including `:‖:` where two keys meet mid-line, thin-thick final bar.
+- Key names: Show / Hide switch (hides them in the preview, PDF and iReal).
+- Teaching note (optional, 120 chars): shown under the header in the preview and PDF, and in iReal as a comment
+  `<*72…>` on the first bar. Just a free-text box — no premade prompts.
 - Dark look = clock colours with gold key names; Light look = black on white with deep-red key names. The "Chart look"
   switch changes both the preview and the PDF.
 - The preview is a canvas-drawn **image** (press-and-hold to save), drawn by the same code as the PDF.

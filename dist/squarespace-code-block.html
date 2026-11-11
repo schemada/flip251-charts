@@ -91,6 +91,17 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .rocker.prog button { flex: 1 1 auto; text-transform: none; letter-spacing: .01em; font: 600 15px var(--font-flap); padding: 8px 8px; }
 .rocker.wrap { flex-wrap: wrap; }
 .ctl.off .rocker, .ctl.off .field { pointer-events: none; }
+.quick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 8px; width: 100%; justify-self: stretch; align-items: stretch; }
+.quick .btn.slim { width: auto; }
+.btn.surprise { background: linear-gradient(180deg, #f0bd62, var(--amber)); color: #4a3207; box-shadow: 0 3px 0 #7d5414, inset 0 1px 0 rgba(255,255,255,.5); }
+@media (max-width: 480px) { .quick { grid-template-columns: minmax(0, 1fr) auto auto; } .quick .surprise { grid-column: 1 / -1; } }
+.progrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; justify-self: stretch; }
+.progrow.two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+.custom { display: grid; gap: 6px; width: 100%; justify-self: stretch; }
+.custom .field { font: 600 14px var(--font-label); }
+.help { margin: 0; font: 500 10.5px/1.5 var(--font-label); color: var(--label); }
+.help.warn { color: #9a3412; min-height: 0; }
+.help.warn:empty { display: none; }
 .rocker button:focus-visible, .chip:focus-visible, .field:focus-visible, .btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ---------- the chart window ---------- */
@@ -178,12 +189,58 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
 
   &lt;div class=&quot;grid&quot; aria-label=&quot;Settings&quot;&gt;
     &lt;div class=&quot;ctl wide&quot;&gt;
-      &lt;span class=&quot;cap&quot;&gt;Progression&lt;/span&gt;
-      &lt;div class=&quot;rocker prog wrap&quot; role=&quot;group&quot; aria-label=&quot;Progression&quot;&gt;
-        &lt;button id=&quot;g-251&quot; aria-pressed=&quot;true&quot;&gt;ii&amp;#8211;V&amp;#8211;I&lt;/button&gt;
-        &lt;button id=&quot;g-25&quot; aria-pressed=&quot;false&quot;&gt;ii&amp;#8211;V&lt;/button&gt;
-        &lt;button id=&quot;g-3625&quot; aria-pressed=&quot;false&quot;&gt;iii&amp;#8211;VI&amp;#8211;ii&amp;#8211;V&lt;/button&gt;
-        &lt;button id=&quot;g-bd&quot; aria-pressed=&quot;false&quot;&gt;Backdoor ii&amp;#8211;V&lt;/button&gt;
+      &lt;span class=&quot;cap&quot;&gt;Quick start&lt;/span&gt;
+      &lt;div class=&quot;quick&quot;&gt;
+        &lt;button class=&quot;btn slim surprise&quot; id=&quot;surprise&quot;&gt;Surprise me&lt;/button&gt;
+        &lt;select class=&quot;field&quot; id=&quot;recipes&quot; aria-label=&quot;Saved recipes&quot;&gt;&lt;/select&gt;
+        &lt;button class=&quot;btn slim&quot; id=&quot;saveRecipe&quot;&gt;Save&lt;/button&gt;
+        &lt;button class=&quot;btn slim&quot; id=&quot;delRecipe&quot; aria-label=&quot;Delete this recipe&quot;&gt;&amp;#10005;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;ctl wide&quot;&gt;
+      &lt;label class=&quot;cap&quot; for=&quot;prog&quot;&gt;Progression&lt;/label&gt;
+      &lt;div class=&quot;progrow&quot;&gt;
+        &lt;select class=&quot;field&quot; id=&quot;prog&quot; aria-label=&quot;Progression&quot;&gt;
+          &lt;optgroup label=&quot;ii&amp;#8211;V&amp;#8211;I&quot;&gt;
+            &lt;option value=&quot;251&quot;&gt;ii&amp;#8211;V&amp;#8211;I&lt;/option&gt;
+            &lt;option value=&quot;25&quot;&gt;ii&amp;#8211;V&lt;/option&gt;
+          &lt;/optgroup&gt;
+          &lt;optgroup label=&quot;ii&amp;#8211;V variations&quot;&gt;
+            &lt;option value=&quot;tt&quot;&gt;Tritone sub &amp;#183; ii&amp;#8211;&amp;#9837;II7&amp;#8211;I&lt;/option&gt;
+            &lt;option value=&quot;M2m&quot;&gt;Major ii&amp;#8211;V &amp;#8594; minor i&lt;/option&gt;
+            &lt;option value=&quot;m2M&quot;&gt;Minor ii&amp;#8211;V &amp;#8594; major I&lt;/option&gt;
+            &lt;option value=&quot;bd&quot;&gt;Backdoor &amp;#183; iv&amp;#8211;&amp;#9837;VII7&amp;#8211;I&lt;/option&gt;
+          &lt;/optgroup&gt;
+          &lt;optgroup label=&quot;Turnarounds&quot;&gt;
+            &lt;option value=&quot;1625&quot;&gt;I&amp;#8211;VI&amp;#8211;ii&amp;#8211;V&lt;/option&gt;
+            &lt;option value=&quot;3625&quot;&gt;iii&amp;#8211;VI&amp;#8211;ii&amp;#8211;V&lt;/option&gt;
+            &lt;option value=&quot;3b325&quot;&gt;iii&amp;#8211;&amp;#9837;iii&amp;#176;&amp;#8211;ii&amp;#8211;V&lt;/option&gt;
+            &lt;option value=&quot;1s125&quot;&gt;I&amp;#8211;&amp;#9839;I&amp;#176;&amp;#8211;ii&amp;#8211;V&lt;/option&gt;
+            &lt;option value=&quot;lady&quot;&gt;Lady Bird &amp;#183; I&amp;#8211;&amp;#9837;III7&amp;#8211;&amp;#9837;VI&amp;#8211;&amp;#9837;II7&lt;/option&gt;
+          &lt;/optgroup&gt;
+          &lt;optgroup label=&quot;Drills&quot;&gt;
+            &lt;option value=&quot;dom&quot;&gt;Dominants only&lt;/option&gt;
+            &lt;option value=&quot;one&quot;&gt;One chord quality&lt;/option&gt;
+          &lt;/optgroup&gt;
+          &lt;optgroup label=&quot;Your own&quot;&gt;
+            &lt;option value=&quot;custom&quot;&gt;Custom progression&amp;#8230;&lt;/option&gt;
+          &lt;/optgroup&gt;
+        &lt;/select&gt;
+        &lt;select class=&quot;field&quot; id=&quot;chordQ&quot; aria-label=&quot;Chord quality&quot; hidden&gt;
+          &lt;option value=&quot;^7&quot;&gt;maj7 (&amp;#916;7)&lt;/option&gt;
+          &lt;option value=&quot;-7&quot;&gt;m7 (&amp;#8211;7)&lt;/option&gt;
+          &lt;option value=&quot;h7&quot;&gt;m7&amp;#9837;5 (&amp;#248;7)&lt;/option&gt;
+          &lt;option value=&quot;o7&quot;&gt;dim7 (&amp;#176;7)&lt;/option&gt;
+          &lt;option value=&quot;-6&quot;&gt;m6 (&amp;#8211;6)&lt;/option&gt;
+          &lt;option value=&quot;-^7&quot;&gt;m(maj7) (&amp;#8211;&amp;#916;7)&lt;/option&gt;
+          &lt;option value=&quot;7sus&quot;&gt;7sus4&lt;/option&gt;
+          &lt;option value=&quot;^7#11&quot;&gt;maj7&amp;#9839;11&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;custom&quot; id=&quot;customRow&quot; hidden&gt;
+        &lt;input class=&quot;field&quot; id=&quot;custom&quot; maxlength=&quot;200&quot; autocomplete=&quot;off&quot; autocapitalize=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;ii-7 V7 | Imaj7 | VI7&quot; aria-describedby=&quot;customHelp&quot;&gt;
+        &lt;p class=&quot;help&quot; id=&quot;customHelp&quot;&gt;Bars split with &lt;b&gt;|&lt;/b&gt;, chords with spaces. Lowercase is minor 7, uppercase is dominant 7 (I and IV are maj7). Add your own quality: &lt;b&gt;ii-7b5 V7b9 i-6&lt;/b&gt;, &lt;b&gt;bVII7&lt;/b&gt;, &lt;b&gt;#iv&amp;#176;&lt;/b&gt;. &lt;b&gt;%&lt;/b&gt; repeats a bar. Plain 7 chords follow the Dominants setting.&lt;/p&gt;
+        &lt;p class=&quot;help warn&quot; id=&quot;customErr&quot;&gt;&lt;/p&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot; id=&quot;qCtl&quot;&gt;
@@ -193,7 +250,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         &lt;button id=&quot;q-minor&quot; aria-pressed=&quot;false&quot;&gt;Minor&lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-    &lt;div class=&quot;ctl&quot;&gt;
+    &lt;div class=&quot;ctl&quot; id=&quot;lenCtl&quot;&gt;
       &lt;span class=&quot;cap&quot;&gt;Length (bars)&lt;/span&gt;
       &lt;div class=&quot;rocker&quot; role=&quot;group&quot; aria-label=&quot;Long or short&quot;&gt;
         &lt;button id=&quot;l-long&quot; aria-pressed=&quot;true&quot;&gt;Long&lt;/button&gt;
@@ -222,7 +279,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       &lt;label class=&quot;cap&quot; for=&quot;start&quot;&gt;Start on&lt;/label&gt;
       &lt;select class=&quot;field&quot; id=&quot;start&quot; aria-label=&quot;First key&quot;&gt;&lt;/select&gt;
     &lt;/div&gt;
-    &lt;div class=&quot;ctl&quot;&gt;
+    &lt;div class=&quot;ctl&quot; id=&quot;domCtl&quot;&gt;
       &lt;span class=&quot;cap&quot;&gt;Dominants&lt;/span&gt;
       &lt;div class=&quot;rocker&quot; role=&quot;group&quot; aria-label=&quot;Dominant chord types&quot;&gt;
         &lt;button id=&quot;m-set&quot; aria-pressed=&quot;true&quot;&gt;As chosen&lt;/button&gt;
@@ -239,7 +296,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot; id=&quot;viCtl&quot;&gt;
-      &lt;span class=&quot;cap&quot;&gt;VI7 sound&lt;/span&gt;
+      &lt;span class=&quot;cap&quot; id=&quot;viCap&quot;&gt;VI7 sound&lt;/span&gt;
       &lt;div class=&quot;rocker&quot; role=&quot;group&quot; aria-label=&quot;VI7 sound&quot;&gt;
         &lt;button id=&quot;dvi-plain&quot; aria-pressed=&quot;false&quot;&gt;7&lt;/button&gt;
         &lt;button id=&quot;dvi-ext&quot; aria-pressed=&quot;true&quot;&gt;13&lt;/button&gt;
@@ -288,6 +345,13 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         &lt;button id=&quot;pdf-light&quot; aria-pressed=&quot;false&quot;&gt;Light&lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
+    &lt;div class=&quot;ctl&quot; id=&quot;kCtl&quot;&gt;
+      &lt;span class=&quot;cap&quot;&gt;Key names&lt;/span&gt;
+      &lt;div class=&quot;rocker&quot; role=&quot;group&quot; aria-label=&quot;Show key names on the chart&quot;&gt;
+        &lt;button id=&quot;k-show&quot; aria-pressed=&quot;true&quot;&gt;Show&lt;/button&gt;
+        &lt;button id=&quot;k-hide&quot; aria-pressed=&quot;false&quot;&gt;Hide&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
     &lt;div class=&quot;ctl&quot;&gt;
       &lt;span class=&quot;cap&quot;&gt;Key order&lt;/span&gt;
       &lt;button class=&quot;btn slim&quot; id=&quot;reshuffle&quot;&gt;Shuffle again&lt;/button&gt;
@@ -295,6 +359,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &lt;div class=&quot;ctl wide&quot;&gt;
       &lt;label class=&quot;cap&quot; for=&quot;title&quot;&gt;Chart title&lt;/label&gt;
       &lt;input class=&quot;field&quot; id=&quot;title&quot; maxlength=&quot;60&quot; autocomplete=&quot;off&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;ctl wide&quot;&gt;
+      &lt;label class=&quot;cap&quot; for=&quot;noteBox&quot;&gt;Teaching note (optional)&lt;/label&gt;
+      &lt;input class=&quot;field&quot; id=&quot;noteBox&quot; maxlength=&quot;120&quot; autocomplete=&quot;off&quot; placeholder=&quot;Shows at the top of the chart&quot;&gt;
     &lt;/div&gt;
   &lt;/div&gt;
 
@@ -335,44 +403,67 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10] },
     minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
   };
-  // progressions: name, whether minor is available, bars per key in long / short
+  /* progressions
+     q: &quot;choose&quot; (the Major/Minor switch applies), &quot;major&quot; / &quot;minor&quot; (fixed), &quot;none&quot; (no key, just roots)
+     bars: per key, long / short (null = as typed); turn: the Bar 4 choice applies;
+     v / vi: what the two dominant-sound selectors are called (vi null = not used) */
   const PROGS = {
-    &quot;251&quot;:  { name: &quot;ii-V-I&quot;,        minor: true,  bars: [4, 2] },
-    &quot;25&quot;:   { name: &quot;ii-V&quot;,          minor: true,  bars: [2, 1] },
-    &quot;bd&quot;:   { name: &quot;Backdoor ii-V&quot;, minor: false, bars: [4, 2] },
-    &quot;3625&quot;: { name: &quot;iii-VI-ii-V&quot;,   minor: false, bars: [4, 2] }
+    &quot;251&quot;:   { name: &quot;ii-V-I&quot;,               q: &quot;choose&quot;, bars: [4, 2], turn: true,  v: &quot;V7&quot;,  vi: &quot;VI7&quot; },
+    &quot;25&quot;:    { name: &quot;ii-V&quot;,                 q: &quot;choose&quot;, bars: [2, 1], turn: false, v: &quot;V7&quot;,  vi: null },
+    &quot;tt&quot;:    { name: &quot;Tritone Sub ii-V-I&quot;,   q: &quot;choose&quot;, bars: [4, 2], turn: true,  v: &quot;&amp;#9837;II7&quot;, vi: &quot;VI7&quot; },
+    &quot;M2m&quot;:   { name: &quot;Major ii-V to Minor i&quot;, q: &quot;minor&quot;, bars: [4, 2], turn: true,  v: &quot;V7&quot;,  vi: &quot;VI7&quot; },
+    &quot;m2M&quot;:   { name: &quot;Minor ii-V to Major I&quot;, q: &quot;major&quot;, bars: [4, 2], turn: true,  v: &quot;V7&quot;,  vi: &quot;VI7&quot; },
+    &quot;bd&quot;:    { name: &quot;Backdoor ii-V&quot;,        q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;&amp;#9837;VII7&quot;, vi: null },
+    &quot;1625&quot;:  { name: &quot;I-VI-ii-V&quot;,            q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: &quot;VI7&quot; },
+    &quot;3625&quot;:  { name: &quot;iii-VI-ii-V&quot;,          q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: &quot;VI7&quot; },
+    &quot;3b325&quot;: { name: &quot;iii-biii dim-ii-V&quot;,    q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: null },
+    &quot;1s125&quot;: { name: &quot;I-#I dim-ii-V&quot;,        q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: null },
+    &quot;lady&quot;:  { name: &quot;Lady Bird Turnaround&quot;, q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;&amp;#9837;II7&quot;, vi: &quot;&amp;#9837;III7&quot; },
+    &quot;dom&quot;:   { name: &quot;Dominants Only&quot;,       q: &quot;none&quot;,   bars: [2, 1], turn: false, v: &quot;Dominant&quot;, vi: null },
+    &quot;one&quot;:   { name: &quot;&quot;,                     q: &quot;none&quot;,   bars: [2, 1], turn: false, v: null,  vi: null },
+    &quot;custom&quot;:{ name: &quot;Custom&quot;,               q: &quot;choose&quot;, bars: null,   turn: false, v: &quot;Dominant&quot;, vi: null }
   };
+  const CHORDQ = { &quot;^7&quot;: &quot;Maj7&quot;, &quot;-7&quot;: &quot;Minor 7&quot;, &quot;h7&quot;: &quot;Half-Diminished&quot;, &quot;o7&quot;: &quot;Diminished 7&quot;, &quot;-6&quot;: &quot;Minor 6&quot;,
+                   &quot;-^7&quot;: &quot;Minor-Major 7&quot;, &quot;7sus&quot;: &quot;7sus4&quot;, &quot;^7#11&quot;: &quot;Maj7#11&quot; };
+  const DOMS = [&quot;plain&quot;, &quot;ext&quot;, &quot;b9&quot;, &quot;alt&quot;];
   const state = {
     prog: &quot;251&quot;, minor: false, short: false, turn: &quot;hold&quot;, order: &quot;cycle&quot;, start: 0, mix: false,
     domV: &quot;ext&quot;, domVI: &quot;ext&quot;, reps: 1, style: &quot;Medium Swing&quot;, pdf: &quot;dark&quot;, acc: &quot;flat&quot;,
+    chordQ: &quot;^7&quot;, custom: &quot;&quot;, note: &quot;&quot;, hideKeys: false,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
-  try {
-    const s = JSON.parse(localStorage.getItem(&quot;chart251&quot;) || &quot;{}&quot;);
+  // copy any valid settings from a saved object onto the state (used on load and for saved recipes)
+  function applySettings(s) {
+    if (!s || typeof s !== &quot;object&quot;) return;
     if (PROGS[s.prog]) state.prog = s.prog;
-    [&quot;minor&quot;, &quot;short&quot;, &quot;mix&quot;].forEach(k =&gt; { if (typeof s[k] === &quot;boolean&quot;) state[k] = s[k]; });
+    [&quot;minor&quot;, &quot;short&quot;, &quot;mix&quot;, &quot;hideKeys&quot;].forEach(k =&gt; { if (typeof s[k] === &quot;boolean&quot;) state[k] = s[k]; });
     if ([&quot;hold&quot;,&quot;vi&quot;].includes(s.turn)) state.turn = s.turn;
     if (ORDERS[s.order]) state.order = s.order;
     if (s.start === -1 || (Number.isInteger(s.start) &amp;&amp; s.start &gt;= 0 &amp;&amp; s.start &lt; 12)) state.start = s.start;
-    [&quot;domV&quot;,&quot;domVI&quot;].forEach(k =&gt; { if ([&quot;plain&quot;,&quot;ext&quot;,&quot;b9&quot;,&quot;alt&quot;].includes(s[k])) state[k] = s[k]; });
+    [&quot;domV&quot;,&quot;domVI&quot;].forEach(k =&gt; { if (DOMS.includes(s[k])) state[k] = s[k]; });
     if ([1,2].includes(s.reps)) state.reps = s.reps;
     if (typeof s.style === &quot;string&quot;) state.style = s.style;
     if ([&quot;dark&quot;,&quot;light&quot;].includes(s.pdf)) state.pdf = s.pdf;
     if ([&quot;flat&quot;,&quot;sharp&quot;].includes(s.acc)) state.acc = s.acc;
+    if (CHORDQ[s.chordQ]) state.chordQ = s.chordQ;
+    if (typeof s.custom === &quot;string&quot;) state.custom = s.custom.slice(0, 200);
+    if (typeof s.note === &quot;string&quot;) state.note = s.note.slice(0, 120);
     const ok = a =&gt; Array.isArray(a) &amp;&amp; a.length &amp;&amp; a.every(p =&gt; Number.isInteger(p) &amp;&amp; p &gt;= 0 &amp;&amp; p &lt; 12);
-    if (s.sel &amp;&amp; ok(s.sel.major)) state.sel.major = s.sel.major;
-    if (s.sel &amp;&amp; ok(s.sel.minor)) state.sel.minor = s.sel.minor;
-  } catch (e) {}
-  function save() {
-    try {
-      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, acc, sel } = state;
-      localStorage.setItem(&quot;chart251&quot;, JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, acc, sel }));
-    } catch (e) {}
+    if (s.sel &amp;&amp; ok(s.sel.major)) state.sel.major = s.sel.major.slice();
+    if (s.sel &amp;&amp; ok(s.sel.minor)) state.sel.minor = s.sel.minor.slice();
   }
-  const isMinor = () =&gt; state.minor &amp;&amp; PROGS[state.prog].minor;     // backdoor and iii&amp;#8211;VI&amp;#8211;ii&amp;#8211;V are major-key sounds
+  const SAVED = [&quot;prog&quot;,&quot;minor&quot;,&quot;short&quot;,&quot;turn&quot;,&quot;order&quot;,&quot;start&quot;,&quot;mix&quot;,&quot;domV&quot;,&quot;domVI&quot;,&quot;reps&quot;,&quot;style&quot;,&quot;pdf&quot;,&quot;acc&quot;,&quot;chordQ&quot;,&quot;custom&quot;,&quot;note&quot;,&quot;hideKeys&quot;];
+  function snapshot() {
+    const o = {}; SAVED.forEach(k =&gt; o[k] = state[k]);
+    o.sel = { major: state.sel.major.slice(), minor: state.sel.minor.slice() };
+    return o;
+  }
+  try { applySettings(JSON.parse(localStorage.getItem(&quot;chart251&quot;) || &quot;{}&quot;)); } catch (e) {}
+  function save() { try { localStorage.setItem(&quot;chart251&quot;, JSON.stringify(snapshot())); } catch (e) {} }
+  const P = () =&gt; PROGS[state.prog];
+  const isMinor = () =&gt; P().q === &quot;minor&quot; || (P().q === &quot;choose&quot; &amp;&amp; state.minor);
   const Q = () =&gt; isMinor() ? &quot;minor&quot; : &quot;major&quot;;
   const sel = () =&gt; state.sel[Q()];
-  const barsPerKey = () =&gt; PROGS[state.prog].bars[state.short ? 1 : 0];
 
   // The five black-key keys are written as flats or sharps, whichever the viewer prefers (D&amp;#9837;/C&amp;#9839;, E&amp;#9837;/D&amp;#9839;, G&amp;#9837;/F&amp;#9839;,
   // A&amp;#9837;/G&amp;#9839;, B&amp;#9837;/A&amp;#9839;), in major and minor alike. Each chord is then spelled from that key.
@@ -396,30 +487,125 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     return r.replace(&quot;&amp;#9837;&quot;, &quot;b&quot;).replace(&quot;&amp;#9839;&quot;, &quot;#&quot;);
   }
   const domQ = (d, minor) =&gt; d === &quot;b9&quot; ? &quot;7b9&quot; : d === &quot;alt&quot; ? &quot;7alt&quot; : d === &quot;ext&quot; &amp;&amp; !minor ? &quot;13&quot; : &quot;7&quot;;
-  const keyName = pc =&gt; ireal(spell(keyFor(pc, isMinor()), 0, 0)) + (isMinor() ? &quot; minor&quot; : &quot; major&quot;);
+  // the key&#x27;s name under its first bar; the drills have no key (the chord itself names the root)
+  const keyName = pc =&gt; P().q === &quot;none&quot; ? &quot;&quot; : ireal(spell(keyFor(pc, isMinor()), 0, 0)) + (isMinor() ? &quot; minor&quot; : &quot; major&quot;);
+
+  /* ---------- custom progressions ----------
+     Roman numerals over the key (always counted from the major scale, so &amp;#9837;III is written &amp;#9837;III), bars split by &quot;|&quot;.
+     A bare numeral gets the usual jazz reading: lowercase is minor 7 (vii is half-diminished), uppercase is a
+     dominant 7, except I and IV which are maj7. Any quality written after the numeral is used as given. */
+  const NUMERALS = { i: [0, 0], ii: [1, 2], iii: [2, 4], iv: [3, 5], v: [4, 7], vi: [5, 9], vii: [6, 11] };
+  // common ways of writing a quality, mapped to iReal Pro&#x27;s own spelling
+  const QALIAS = {
+    &quot;maj7&quot;: &quot;^7&quot;, &quot;ma7&quot;: &quot;^7&quot;, &quot;M7&quot;: &quot;^7&quot;, &quot;&amp;#916;&quot;: &quot;^7&quot;, &quot;&amp;#916;7&quot;: &quot;^7&quot;, &quot;&amp;#9651;&quot;: &quot;^7&quot;, &quot;&amp;#9651;7&quot;: &quot;^7&quot;, &quot;^&quot;: &quot;^7&quot;, &quot;^7&quot;: &quot;^7&quot;, &quot;j7&quot;: &quot;^7&quot;,
+    &quot;maj9&quot;: &quot;^9&quot;, &quot;M9&quot;: &quot;^9&quot;, &quot;&amp;#916;9&quot;: &quot;^9&quot;, &quot;^9&quot;: &quot;^9&quot;, &quot;maj7#11&quot;: &quot;^7#11&quot;, &quot;&amp;#916;7#11&quot;: &quot;^7#11&quot;, &quot;^7#11&quot;: &quot;^7#11&quot;,
+    &quot;6&quot;: &quot;6&quot;, &quot;69&quot;: &quot;69&quot;, &quot;6/9&quot;: &quot;69&quot;,
+    &quot;m7&quot;: &quot;-7&quot;, &quot;min7&quot;: &quot;-7&quot;, &quot;mi7&quot;: &quot;-7&quot;, &quot;-7&quot;: &quot;-7&quot;, &quot;m&quot;: &quot;-&quot;, &quot;min&quot;: &quot;-&quot;, &quot;-&quot;: &quot;-&quot;,
+    &quot;m6&quot;: &quot;-6&quot;, &quot;-6&quot;: &quot;-6&quot;, &quot;m9&quot;: &quot;-9&quot;, &quot;-9&quot;: &quot;-9&quot;, &quot;m11&quot;: &quot;-11&quot;, &quot;-11&quot;: &quot;-11&quot;,
+    &quot;mmaj7&quot;: &quot;-^7&quot;, &quot;mM7&quot;: &quot;-^7&quot;, &quot;m^7&quot;: &quot;-^7&quot;, &quot;-^7&quot;: &quot;-^7&quot;, &quot;m&amp;#916;7&quot;: &quot;-^7&quot;, &quot;-&amp;#916;7&quot;: &quot;-^7&quot;, &quot;m&amp;#916;&quot;: &quot;-^7&quot;, &quot;-&amp;#916;&quot;: &quot;-^7&quot;,
+    &quot;&amp;#248;&quot;: &quot;h7&quot;, &quot;&amp;#248;7&quot;: &quot;h7&quot;, &quot;h&quot;: &quot;h7&quot;, &quot;h7&quot;: &quot;h7&quot;, &quot;m7b5&quot;: &quot;h7&quot;, &quot;-7b5&quot;: &quot;h7&quot;, &quot;min7b5&quot;: &quot;h7&quot;,
+    &quot;&amp;#176;&quot;: &quot;o7&quot;, &quot;&amp;#176;7&quot;: &quot;o7&quot;, &quot;o&quot;: &quot;o7&quot;, &quot;o7&quot;: &quot;o7&quot;, &quot;dim&quot;: &quot;o7&quot;, &quot;dim7&quot;: &quot;o7&quot;,
+    &quot;7&quot;: &quot;7&quot;, &quot;dom7&quot;: &quot;7&quot;, &quot;9&quot;: &quot;9&quot;, &quot;13&quot;: &quot;13&quot;, &quot;11&quot;: &quot;11&quot;, &quot;7b9&quot;: &quot;7b9&quot;, &quot;7#9&quot;: &quot;7#9&quot;, &quot;7#11&quot;: &quot;7#11&quot;, &quot;7b13&quot;: &quot;7b13&quot;,
+    &quot;7b5&quot;: &quot;7b5&quot;, &quot;7#5&quot;: &quot;7#5&quot;, &quot;7+&quot;: &quot;7#5&quot;, &quot;+7&quot;: &quot;7#5&quot;, &quot;+&quot;: &quot;+&quot;, &quot;aug&quot;: &quot;+&quot;, &quot;alt&quot;: &quot;7alt&quot;, &quot;7alt&quot;: &quot;7alt&quot;,
+    &quot;sus&quot;: &quot;7sus&quot;, &quot;sus4&quot;: &quot;7sus&quot;, &quot;7sus&quot;: &quot;7sus&quot;, &quot;7sus4&quot;: &quot;7sus&quot;, &quot;9sus&quot;: &quot;9sus&quot;, &quot;9sus4&quot;: &quot;9sus&quot;, &quot;13sus&quot;: &quot;13sus&quot;,
+    &quot;7b9sus&quot;: &quot;7b9sus&quot;, &quot;13b9&quot;: &quot;13b9&quot;, &quot;13#11&quot;: &quot;13#11&quot;, &quot;9#11&quot;: &quot;9#11&quot;, &quot;7b9b13&quot;: &quot;7b9b13&quot;, &quot;7#9b13&quot;: &quot;7b13&quot;
+  };
+  function parseCustom(text) {
+    const src = (text || &quot;&quot;).trim() || &quot;ii-7 V7 | Imaj7&quot;;
+    const bars = [], bad = [];
+    src.replace(/[\n,;]+/g, &quot; &quot;).split(&quot;|&quot;).forEach(seg =&gt; {
+      const toks = seg.trim().split(/\s+/).filter(Boolean);
+      if (!toks.length) return;
+      const bar = [];
+      toks.forEach(t =&gt; {
+        if (/^(%|x|\/)$/i.test(t) &amp;&amp; !bar.length) { bar.push({ rep: true }); return; }
+        const m = t.normalize(&quot;NFC&quot;).replace(/&amp;#9837;/g, &quot;b&quot;).replace(/&amp;#9839;/g, &quot;#&quot;).replace(/&amp;#8211;/g, &quot;-&quot;)
+                   .match(/^([b#]?)(vii|vi|v|iv|iii|ii|i)(.*)$/i);
+        if (!m || bar.some(c =&gt; c.rep)) { bad.push(t); return; }
+        const num = m[2], low = num === num.toLowerCase(), up = num === num.toUpperCase();
+        if (!low &amp;&amp; !up) { bad.push(t); return; }
+        const [steps, semis] = NUMERALS[num.toLowerCase()];
+        let qual = m[3], dom = false;
+        if (!qual) {
+          const n = num.toLowerCase();
+          qual = low ? (n === &quot;vii&quot; ? &quot;h7&quot; : &quot;-7&quot;) : (n === &quot;i&quot; || n === &quot;iv&quot; ? &quot;^7&quot; : &quot;7&quot;);
+        } else if (QALIAS[qual] !== undefined) qual = QALIAS[qual];
+        else if (QALIAS[qual.toLowerCase()] !== undefined &amp;&amp; !/^M/.test(qual)) qual = QALIAS[qual.toLowerCase()];
+        else if (!/^[\w#^+\-]+$/.test(qual)) { bad.push(t); return; }
+        if (qual === &quot;7&quot;) dom = true;                       // plain 7ths follow the Dominants setting
+        bar.push({ steps, semis: semis + (m[1] === &quot;b&quot; ? -1 : m[1] === &quot;#&quot; ? 1 : 0), qual, dom });
+      });
+      if (bar.length &gt; 4) { bad.push(...bar.slice(4).map(() =&gt; &quot;(more than 4 chords in a bar)&quot;)); bar.length = 4; }
+      if (bar.length) bars.push(bar);
+    });
+    if (bars.length &amp;&amp; bars[0][0].rep) bars.shift();
+    return { bars: bars.slice(0, 16), bad: [...new Set(bad)] };
+  }
+  let customParsed = parseCustom(state.custom);
 
   // one key&#x27;s bars as iReal chord tokens, e.g. [[&quot;D-7&quot;], [&quot;G13&quot;], [&quot;C^7&quot;], [&quot;x&quot;]]
   function barsFor(pc, idx) {
     const minor = isMinor(), key = keyFor(pc, minor);
-    const pick = state.mix &amp;&amp; mix[idx] ? mix[idx] : { v: state.domV, vi: state.domVI };
+    // each dominant takes its sound from the V7 / VI7 selectors, or its own roll of the dice in Random mode
+    let d = 0;
+    const dq = (role, minorCtx) =&gt; {
+      const t = state.mix &amp;&amp; mix[idx] ? mix[idx][d++ % mix[idx].length] : (role === &quot;vi&quot; ? state.domVI : state.domV);
+      return domQ(t, minorCtx);
+    };
     const r = (steps, semis) =&gt; ireal(spell(key, steps, semis));
-    const ii = r(1, 2) + (minor ? &quot;h7&quot; : &quot;-7&quot;), V = r(4, 7) + domQ(pick.v, minor);
-    const I = r(0, 0) + (minor ? &quot;-6&quot; : &quot;^7&quot;);
     const long = !state.short;
+    const ii = r(1, 2) + (minor ? &quot;h7&quot; : &quot;-7&quot;), I = r(0, 0) + (minor ? &quot;-6&quot; : &quot;^7&quot;);
+    const four = (a, b, c, e) =&gt; long ? [[a], [b], [c], [e]] : [[a, b], [c, e]];
+    // ii&amp;#8211;V&amp;#8211;I shapes: the long form&#x27;s fourth bar holds the I or turns back with VI7
+    const twoFiveOne = (two, five, one, minorCtx) =&gt; {
+      if (!long) return [[two, five], [one]];
+      return [[two], [five], [one], [state.turn === &quot;hold&quot; ? &quot;x&quot; : r(5, 9) + dq(&quot;vi&quot;, minorCtx)]];
+    };
     switch (state.prog) {
-      case &quot;25&quot;:
+      case &quot;25&quot;: {
+        const V = r(4, 7) + dq(&quot;v&quot;, minor);
         return long ? [[ii], [V]] : [[ii, V]];
+      }
+      case &quot;tt&quot;:                                              // ii&amp;#8211;&amp;#9837;II7&amp;#8211;I (in C: D&amp;#8211;7 D&amp;#9837;7 Cmaj7)
+        return twoFiveOne(ii, r(1, 1) + dq(&quot;v&quot;, minor), I, minor);
+      case &quot;M2m&quot;:                                             // major ii&amp;#8211;V into minor i (C minor: D&amp;#8211;7 G7 C&amp;#8211;6)
+        return twoFiveOne(r(1, 2) + &quot;-7&quot;, r(4, 7) + dq(&quot;v&quot;, true), r(0, 0) + &quot;-6&quot;, true);
+      case &quot;m2M&quot;:                                             // minor ii&amp;#8211;V into major I (C major: D&amp;#248;7 G7 Cmaj7)
+        return twoFiveOne(r(1, 2) + &quot;h7&quot;, r(4, 7) + dq(&quot;v&quot;, false), r(0, 0) + &quot;^7&quot;, false);
       case &quot;bd&quot;: {                                            // iv&amp;#8211;&amp;#9837;VII7 &amp;#8594; I (in C: F&amp;#8211;7 B&amp;#9837;7 Cmaj7)
-        const iv = r(3, 5) + &quot;-7&quot;, bVII = r(6, 10) + domQ(pick.v, false);
+        const iv = r(3, 5) + &quot;-7&quot;, bVII = r(6, 10) + dq(&quot;v&quot;, false);
         return long ? [[iv], [bVII], [I], [&quot;x&quot;]] : [[iv, bVII], [I]];
       }
-      case &quot;3625&quot;: {                                          // iii&amp;#8211;VI7&amp;#8211;ii&amp;#8211;V7 (in C: E&amp;#8211;7 A7 D&amp;#8211;7 G7)
-        const iii = r(2, 4) + &quot;-7&quot;, VI = r(5, 9) + domQ(pick.vi, false);
-        return long ? [[iii], [VI], [ii], [V]] : [[iii, VI], [ii, V]];
+      case &quot;1625&quot;: {                                          // I&amp;#8211;VI7&amp;#8211;ii&amp;#8211;V7 (in C: Cmaj7 A7 D&amp;#8211;7 G7)
+        const VI = r(5, 9) + dq(&quot;vi&quot;, false);
+        return four(I, VI, ii, r(4, 7) + dq(&quot;v&quot;, false));
       }
-      default:
-        if (!long) return [[ii, V], [I]];
-        return [[ii], [V], [I], [state.turn === &quot;hold&quot; ? &quot;x&quot; : r(5, 9) + domQ(pick.vi, minor)]];
+      case &quot;3625&quot;: {                                          // iii&amp;#8211;VI7&amp;#8211;ii&amp;#8211;V7 (in C: E&amp;#8211;7 A7 D&amp;#8211;7 G7)
+        const VI = r(5, 9) + dq(&quot;vi&quot;, false);
+        return four(r(2, 4) + &quot;-7&quot;, VI, ii, r(4, 7) + dq(&quot;v&quot;, false));
+      }
+      case &quot;3b325&quot;:                                           // iii&amp;#8211;&amp;#9837;iii&amp;#176;7&amp;#8211;ii&amp;#8211;V7 (in C: E&amp;#8211;7 E&amp;#9837;&amp;#176;7 D&amp;#8211;7 G7)
+        return four(r(2, 4) + &quot;-7&quot;, r(2, 3) + &quot;o7&quot;, ii, r(4, 7) + dq(&quot;v&quot;, false));
+      case &quot;1s125&quot;:                                           // I&amp;#8211;&amp;#9839;I&amp;#176;7&amp;#8211;ii&amp;#8211;V7 (in C: Cmaj7 C&amp;#9839;&amp;#176;7 D&amp;#8211;7 G7)
+        return four(I, r(0, 1) + &quot;o7&quot;, ii, r(4, 7) + dq(&quot;v&quot;, false));
+      case &quot;lady&quot;: {                                          // Lady Bird: Cmaj7 E&amp;#9837;7 A&amp;#9837;maj7 D&amp;#9837;7
+        const bIII = r(2, 3) + dq(&quot;vi&quot;, false);
+        return four(I, bIII, r(5, 8) + &quot;^7&quot;, r(1, 1) + dq(&quot;v&quot;, false));
+      }
+      case &quot;dom&quot;: {                                           // one dominant per key; the Order menu moves it
+        const ch = r(0, 0) + dq(&quot;v&quot;, false);
+        return long ? [[ch], [&quot;x&quot;]] : [[ch]];
+      }
+      case &quot;one&quot;: {
+        const ch = r(0, 0) + state.chordQ;
+        return long ? [[ch], [&quot;x&quot;]] : [[ch]];
+      }
+      case &quot;custom&quot;:
+        return customParsed.bars.map(bar =&gt; bar.map(c =&gt; c.rep ? &quot;x&quot; : r(c.steps, c.semis) + (c.dom ? dq(&quot;v&quot;, minor) : c.qual)));
+      default: {
+        const V = r(4, 7) + dq(&quot;v&quot;, minor);
+        return twoFiveOne(ii, V, I, minor);
+      }
     }
   }
 
@@ -450,14 +636,14 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     rollMix();
   }
   // &quot;Random mix&quot;: every dominant gets its own type, re-rolled with each shuffle
-  function rollMix() { mix = order.map(() =&gt; ({ v: TYPES[Math.floor(Math.random() * 4)], vi: TYPES[Math.floor(Math.random() * 4)] })); }
+  function rollMix() { mix = order.map(() =&gt; Array.from({ length: 8 }, () =&gt; TYPES[Math.floor(Math.random() * 4)])); }
 
   /* ---------- the chart as lines of 4 bars ---------- */
   // every key&#x27;s bars in order, flagged with where each key starts and ends; 4 bars to a line, like iReal Pro
   function chartBars() {
     const out = [];
     order.forEach((pc, k) =&gt; {
-      barsFor(pc, k).forEach((chords, j, all) =&gt; out.push({ chords, label: j === 0 ? keyName(pc) : &quot;&quot;, segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
+      barsFor(pc, k).forEach((chords, j, all) =&gt; out.push({ chords, label: j === 0 &amp;&amp; !state.hideKeys ? keyName(pc) : &quot;&quot;, segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
     });
     return out;
   }
@@ -469,18 +655,41 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
 
   /* ---------- iReal Pro text ---------- */
   // Each bar is padded to 4 cells so a line holds exactly 4 bars in iReal Pro.
-  function cell(chords) { return chords.length === 1 ? chords[0] + &quot;   &quot; : chords[0] + &quot; &quot; + chords[1] + &quot; &quot;; }
+  // Up to 4 chords share a bar&#x27;s 4 cells (1: X _ _ _, 2: X _ Y _, 3: X Y Z _, 4: W X Y Z); a comment
+  // (&lt;text&gt;) is attached to the cell it sits in front of. Neighbouring chords are separated by commas.
+  const SLOTS = { 1: [0], 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
+  function cell(chords, notes) {
+    const slots = [&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;];
+    chords.forEach((ch, i) =&gt; slots[SLOTS[chords.length][i]] = ch);
+    let out = &quot;&quot;, prev = false;
+    slots.forEach((ch, i) =&gt; {
+      const n = notes &amp;&amp; notes[i] ? &quot;&lt;&quot; + notes[i] + &quot;&gt;&quot; : &quot;&quot;;
+      out += (ch &amp;&amp; prev ? &quot;,&quot; : &quot;&quot;) + n + (ch || &quot; &quot;);
+      prev = !!ch;
+    });
+    return out;
+  }
+  const noteText = () =&gt; state.note.trim().replace(/[&lt;&gt;=|]/g, &quot; &quot;).replace(/\s+/g, &quot; &quot;);
   function music() {
     const open = state.reps === 2 ? &quot;{&quot; : &quot;[&quot;, close = state.reps === 2 ? &quot;}&quot; : &quot;]&quot;;
     return order.map((pc, k) =&gt; {
-      const body = barsFor(pc, k).map((b, i) =&gt; (i === 0 ? &quot;&lt;&quot; + keyName(pc) + &quot;&gt;&quot; : &quot;&quot;) + cell(b)).join(&quot;|&quot;);
+      const body = barsFor(pc, k).map((b, i) =&gt; {
+        const notes = [&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;];
+        if (i === 0 &amp;&amp; !state.hideKeys &amp;&amp; keyName(pc)) notes[0] = keyName(pc);
+        // the teaching note goes at the top of the first bar (*72 lifts a comment above the chords in iReal Pro)
+        if (k === 0 &amp;&amp; i === 0 &amp;&amp; noteText()) notes[notes[0] ? 1 : 0] = &quot;*72&quot; + noteText();
+        return cell(b, notes);
+      }).join(&quot;|&quot;);
       const last = k === order.length - 1;
       return open + (k === 0 ? &quot;T44&quot; : &quot;&quot;) + body + (last &amp;&amp; state.reps === 1 ? &quot;Z&quot; : close);
     }).join(&quot;&quot;);
   }
   function defaultTitle() {
-    const p = PROGS[state.prog];
-    return p.name + (p.minor ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;) + &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) + &quot; (&quot; + ORDERS[state.order].title + &quot;)&quot;;
+    const p = P();
+    const name = state.prog === &quot;one&quot; ? CHORDQ[state.chordQ] + &quot; Chords&quot; : p.name;
+    const q = p.q === &quot;choose&quot; ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;;
+    const len = p.bars ? &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) : &quot;&quot;;
+    return name + q + len + &quot; (&quot; + ORDERS[state.order].title + &quot;)&quot;;
   }
   function chartTitle() { return ($(&quot;title&quot;).value.trim() || defaultTitle()).replace(/=/g, &quot;-&quot;); }
   function url() {
@@ -538,39 +747,58 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     const st = $(&quot;start&quot;), s2 = sel(), list = BY_FOURTHS.filter(p =&gt; s2.includes(p));
     st.innerHTML = &#x27;&lt;option value=&quot;-1&quot;&gt;Any key&lt;/option&gt;&#x27; + list.map(p =&gt; {
       const r = spell(keyFor(p, isMinor()), 0, 0);
-      return &#x27;&lt;option value=&quot;&#x27; + p + &#x27;&quot;&gt;&#x27; + r + (isMinor() ? &quot; minor&quot; : &quot; major&quot;) + &quot;&lt;/option&gt;&quot;;
+      return &#x27;&lt;option value=&quot;&#x27; + p + &#x27;&quot;&gt;&#x27; + r + (P().q === &quot;none&quot; ? &quot;&quot; : isMinor() ? &quot; minor&quot; : &quot; major&quot;) + &quot;&lt;/option&gt;&quot;;
     }).join(&quot;&quot;);
     st.value = String(s2.includes(state.start) ? state.start : -1);
   }
   function sync() {
-    const P = PROGS[state.prog], n = P.bars;
-    [&quot;251&quot;,&quot;25&quot;,&quot;bd&quot;,&quot;3625&quot;].forEach(g =&gt; press(&quot;g-&quot; + g, state.prog === g));
-    press(&quot;q-major&quot;, !state.minor || !P.minor); press(&quot;q-minor&quot;, state.minor &amp;&amp; P.minor);
-    $(&quot;qCtl&quot;).classList.toggle(&quot;off&quot;, !P.minor);
-    $(&quot;qCap&quot;).textContent = P.minor ? &quot;Quality&quot; : &quot;Quality (major only)&quot;;
+    const p = P(), n = p.bars, q = p.q;
+    $(&quot;prog&quot;).value = state.prog;
+    $(&quot;chordQ&quot;).hidden = state.prog !== &quot;one&quot;; $(&quot;chordQ&quot;).value = state.chordQ;
+    $(&quot;prog&quot;).parentElement.classList.toggle(&quot;two&quot;, state.prog === &quot;one&quot;);
+    $(&quot;customRow&quot;).hidden = state.prog !== &quot;custom&quot;;
+    if (state.prog === &quot;custom&quot;) {
+      if (document.activeElement !== $(&quot;custom&quot;)) $(&quot;custom&quot;).value = state.custom;
+      $(&quot;customErr&quot;).textContent = customParsed.bad.length ? &quot;Skipped: &quot; + customParsed.bad.join(&quot;  &quot;) : &quot;&quot;;
+    }
+    press(&quot;q-major&quot;, !isMinor()); press(&quot;q-minor&quot;, isMinor());
+    $(&quot;qCtl&quot;).classList.toggle(&quot;off&quot;, q !== &quot;choose&quot;);
+    $(&quot;qCap&quot;).textContent = q === &quot;choose&quot; ? &quot;Quality&quot; : q === &quot;major&quot; ? &quot;Quality (major only)&quot; : q === &quot;minor&quot; ? &quot;Quality (minor only)&quot; : &quot;Quality&quot;;
     press(&quot;l-long&quot;, !state.short); press(&quot;l-short&quot;, state.short);
-    $(&quot;l-long&quot;).textContent = &quot;Long &amp;#183; &quot; + n[0];
-    $(&quot;l-short&quot;).textContent = &quot;Short &amp;#183; &quot; + n[1];
+    $(&quot;lenCtl&quot;).classList.toggle(&quot;off&quot;, !n);
+    $(&quot;l-long&quot;).textContent = n ? &quot;Long &amp;#183; &quot; + n[0] : &quot;Long&quot;;
+    $(&quot;l-short&quot;).textContent = n ? &quot;Short &amp;#183; &quot; + n[1] : &quot;Short&quot;;
     press(&quot;t-hold&quot;, state.turn === &quot;hold&quot;); press(&quot;t-vi&quot;, state.turn === &quot;vi&quot;);
-    $(&quot;turnCtl&quot;).classList.toggle(&quot;off&quot;, !(state.prog === &quot;251&quot; &amp;&amp; !state.short));
+    $(&quot;turnCtl&quot;).classList.toggle(&quot;off&quot;, !(p.turn &amp;&amp; !state.short));
     $(&quot;order&quot;).value = state.order;
     // &quot;Start on&quot; only matters when cycling; it stays in place but greys out for Shuffle
     $(&quot;startCtl&quot;).classList.toggle(&quot;off&quot;, state.order === &quot;random&quot;);
     $(&quot;start&quot;).disabled = state.order === &quot;random&quot;;
-    [&quot;plain&quot;,&quot;ext&quot;,&quot;b9&quot;,&quot;alt&quot;].forEach(d =&gt; { press(&quot;dv-&quot; + d, state.domV === d); press(&quot;dvi-&quot; + d, state.domVI === d); });
+    DOMS.forEach(d =&gt; { press(&quot;dv-&quot; + d, state.domV === d); press(&quot;dvi-&quot; + d, state.domVI === d); });
     press(&quot;m-set&quot;, !state.mix); press(&quot;m-mix&quot;, state.mix);
-    $(&quot;vCap&quot;).textContent = state.prog === &quot;bd&quot; ? &quot;&amp;#9837;VII7 sound&quot; : &quot;V7 sound&quot;;
-    $(&quot;vCtl&quot;).classList.toggle(&quot;off&quot;, state.mix);
-    const usesVI = state.prog === &quot;3625&quot; || (state.prog === &quot;251&quot; &amp;&amp; !state.short &amp;&amp; state.turn === &quot;vi&quot;);
+    $(&quot;domCtl&quot;).classList.toggle(&quot;off&quot;, !p.v);
+    $(&quot;vCap&quot;).textContent = (p.v || &quot;V7&quot;) + &quot; sound&quot;;
+    $(&quot;vCtl&quot;).classList.toggle(&quot;off&quot;, state.mix || !p.v);
+    const usesVI = p.vi &amp;&amp; (state.prog !== &quot;251&quot; &amp;&amp; state.prog !== &quot;tt&quot; &amp;&amp; state.prog !== &quot;M2m&quot; &amp;&amp; state.prog !== &quot;m2M&quot; || (!state.short &amp;&amp; state.turn === &quot;vi&quot;));
+    $(&quot;viCap&quot;).textContent = (p.vi || &quot;VI7&quot;) + &quot; sound&quot;;
     $(&quot;viCtl&quot;).classList.toggle(&quot;off&quot;, state.mix || !usesVI);
     press(&quot;r-1&quot;, state.reps === 1); press(&quot;r-2&quot;, state.reps === 2);
     $(&quot;style&quot;).value = state.style;
     press(&quot;pdf-dark&quot;, state.pdf === &quot;dark&quot;); press(&quot;pdf-light&quot;, state.pdf === &quot;light&quot;);
+    press(&quot;k-show&quot;, !state.hideKeys); press(&quot;k-hide&quot;, state.hideKeys);
+    $(&quot;kCtl&quot;).classList.toggle(&quot;off&quot;, q === &quot;none&quot;);
+    if (document.activeElement !== $(&quot;noteBox&quot;)) $(&quot;noteBox&quot;).value = state.note;
     document.querySelector(&quot;.window&quot;).classList.toggle(&quot;light&quot;, state.pdf === &quot;light&quot;);
   }
   function changed(reDeal) { save(); renderChips(); if (reDeal) deal(); render(); }
 
-  [&quot;251&quot;,&quot;25&quot;,&quot;bd&quot;,&quot;3625&quot;].forEach(g =&gt; $(&quot;g-&quot; + g).onclick = () =&gt; { const was = Q(); state.prog = g; changed(Q() !== was); });
+  $(&quot;prog&quot;).onchange = e =&gt; { const was = Q(); state.prog = e.target.value; changed(Q() !== was); };
+  $(&quot;chordQ&quot;).onchange = e =&gt; { state.chordQ = e.target.value; changed(false); };
+  let ct = 0;
+  $(&quot;custom&quot;).oninput = e =&gt; {
+    state.custom = e.target.value; customParsed = parseCustom(state.custom);
+    clearTimeout(ct); ct = setTimeout(() =&gt; changed(false), 120);
+  };
   $(&quot;q-major&quot;).onclick = () =&gt; { state.minor = false; changed(true); };
   $(&quot;q-minor&quot;).onclick = () =&gt; { state.minor = true; changed(true); };
   $(&quot;l-long&quot;).onclick = () =&gt; { state.short = false; changed(false); };
@@ -578,7 +806,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $(&quot;t-hold&quot;).onclick = () =&gt; { state.turn = &quot;hold&quot;; changed(false); };
   $(&quot;t-vi&quot;).onclick = () =&gt; { state.turn = &quot;vi&quot;; changed(false); };
   $(&quot;order&quot;).onchange = e =&gt; { state.order = e.target.value; changed(true); };
-  [&quot;plain&quot;,&quot;ext&quot;,&quot;b9&quot;,&quot;alt&quot;].forEach(d =&gt; {
+  DOMS.forEach(d =&gt; {
     $(&quot;dv-&quot; + d).onclick = () =&gt; { state.domV = d; changed(false); };
     $(&quot;dvi-&quot; + d).onclick = () =&gt; { state.domVI = d; changed(false); };
   });
@@ -588,6 +816,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $(&quot;r-2&quot;).onclick = () =&gt; { state.reps = 2; changed(false); };
   $(&quot;pdf-dark&quot;).onclick = () =&gt; { state.pdf = &quot;dark&quot;; save(); render(); };
   $(&quot;pdf-light&quot;).onclick = () =&gt; { state.pdf = &quot;light&quot;; save(); render(); };
+  $(&quot;k-show&quot;).onclick = () =&gt; { state.hideKeys = false; changed(false); };
+  $(&quot;k-hide&quot;).onclick = () =&gt; { state.hideKeys = true; changed(false); };
   $(&quot;style&quot;).onchange = e =&gt; { state.style = e.target.value; changed(false); };
   $(&quot;start&quot;).onchange = e =&gt; { state.start = Number(e.target.value); changed(true); };
   [&quot;all&quot;,&quot;start&quot;].forEach(p =&gt; $(&quot;p-&quot; + p).onclick = () =&gt; { state.sel[Q()] = PRESETS[Q()][p].slice(); changed(true); });
@@ -595,6 +825,66 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $(&quot;sp-flat&quot;).onclick = () =&gt; { state.acc = &quot;flat&quot;; changed(false); };
   $(&quot;sp-sharp&quot;).onclick = () =&gt; { state.acc = &quot;sharp&quot;; changed(false); };
   $(&quot;title&quot;).oninput = () =&gt; render();
+  let nt = 0;
+  $(&quot;noteBox&quot;).oninput = e =&gt; { state.note = e.target.value; clearTimeout(nt); nt = setTimeout(() =&gt; changed(false), 120); };
+
+  /* ---------- Surprise me: a random exercise from the library (keys, repeats, style and look stay as set) ---------- */
+  const pickOne = a =&gt; a[Math.floor(Math.random() * a.length)];
+  $(&quot;surprise&quot;).onclick = () =&gt; {
+    const progs = Object.keys(PROGS).filter(k =&gt; k !== &quot;custom&quot; &amp;&amp; k !== state.prog);
+    state.prog = pickOne(progs);
+    state.minor = Math.random() &lt; .35;
+    state.short = Math.random() &lt; .4;
+    state.turn = pickOne([&quot;hold&quot;, &quot;vi&quot;]);
+    state.order = pickOne(Object.keys(ORDERS));
+    state.mix = Math.random() &lt; .4;
+    state.domV = pickOne(DOMS); state.domVI = pickOne(DOMS);
+    state.chordQ = pickOne(Object.keys(CHORDQ));
+    const s = sel(); state.start = pickOne(s);
+    $(&quot;title&quot;).value = &quot;&quot;; $(&quot;recipes&quot;).value = &quot;&quot;;
+    changed(true);
+    status(&quot;Surprise: &quot; + defaultTitle().replace(/ \(.*\)$/, &quot;&quot;) + &quot;, &quot; + ORDERS[state.order].note + &quot;.&quot;);
+  };
+
+  /* ---------- saved recipes: the whole setup under a name, kept on this device ---------- */
+  const RKEY = &quot;chart251.recipes&quot;;
+  function loadRecipes() { try { const r = JSON.parse(localStorage.getItem(RKEY) || &quot;[]&quot;); return Array.isArray(r) ? r.filter(x =&gt; x &amp;&amp; typeof x.name === &quot;string&quot; &amp;&amp; x.s) : []; } catch (e) { return []; } }
+  function storeRecipes(list) { try { localStorage.setItem(RKEY, JSON.stringify(list)); return true; } catch (e) { return false; } }
+  function renderRecipes(selected) {
+    const list = loadRecipes(), r = $(&quot;recipes&quot;);
+    r.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;&#x27; + (list.length ? &quot;Saved recipes (&quot; + list.length + &quot;)&quot; : &quot;No saved recipes yet&quot;) + &quot;&lt;/option&gt;&quot; +
+      list.map((x, i) =&gt; &#x27;&lt;option value=&quot;&#x27; + i + &#x27;&quot;&gt;&lt;/option&gt;&#x27;).join(&quot;&quot;);
+    list.forEach((x, i) =&gt; r.options[i + 1].textContent = x.name);
+    r.value = selected != null &amp;&amp; selected &gt;= 0 ? String(selected) : &quot;&quot;;
+    $(&quot;delRecipe&quot;).disabled = r.value === &quot;&quot;;
+  }
+  $(&quot;saveRecipe&quot;).onclick = () =&gt; {
+    const name = chartTitle(), list = loadRecipes();
+    const entry = { name, title: $(&quot;title&quot;).value.trim(), s: snapshot() };
+    let i = list.findIndex(x =&gt; x.name === name);
+    if (i &gt;= 0) list[i] = entry; else { list.push(entry); i = list.length - 1; }
+    if (!storeRecipes(list)) { status(&quot;Couldn&#x27;t save on this device.&quot;); return; }
+    renderRecipes(i);
+    status(&quot;Saved \u201c&quot; + name + &quot;\u201d.&quot; + ($(&quot;title&quot;).value.trim() ? &quot;&quot; : &quot; To name a recipe, type a Chart title first.&quot;));
+  };
+  $(&quot;recipes&quot;).onchange = e =&gt; {
+    const list = loadRecipes(), x = list[Number(e.target.value)];
+    $(&quot;delRecipe&quot;).disabled = !x;
+    if (!x) return;
+    applySettings(x.s); customParsed = parseCustom(state.custom);
+    $(&quot;title&quot;).value = x.title || &quot;&quot;;
+    $(&quot;custom&quot;).value = state.custom; $(&quot;noteBox&quot;).value = state.note;
+    changed(true);
+    status(&quot;Loaded \u201c&quot; + x.name + &quot;\u201d with fresh keys.&quot;);
+  };
+  $(&quot;delRecipe&quot;).onclick = () =&gt; {
+    const list = loadRecipes(), i = Number($(&quot;recipes&quot;).value);
+    if ($(&quot;recipes&quot;).value === &quot;&quot; || !list[i]) return;
+    const gone = list.splice(i, 1)[0];
+    storeRecipes(list); renderRecipes(-1);
+    status(&quot;Deleted \u201c&quot; + gone.name + &quot;\u201d. Tap Save to put it back.&quot;);
+  };
+
   // Shuffle again re-deals everything; while cycling it also picks a new starting key
   $(&quot;reshuffle&quot;).onclick = () =&gt; {
     if (state.order !== &quot;random&quot;) {
@@ -693,7 +983,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     const put = (t, px, py) =&gt; { if (!dry) c.fillText(t, px, py); };
     if (tok === &quot;x&quot;) { c.fillStyle = PDF.dim; c.font = &quot;500 &quot; + S + &quot;px &quot; + FLAP; put(&quot;%&quot;, x + S * .15, y); return S; }
     const m = tok.match(/^([A-G])([b#]?)(.*)$/);
-    const q = m[3].replace(&quot;^7&quot;, &quot;&amp;#916;7&quot;).replace(&quot;h7&quot;, &quot;&amp;#248;7&quot;).replace(/-/g, &quot;&amp;#8211;&quot;);
+    // iReal spelling to lead-sheet symbols: ^ &amp;#8594; &amp;#916;, h &amp;#8594; &amp;#248;, o &amp;#8594; &amp;#176;, - &amp;#8594; &amp;#8211;
+    const q = m[3].replace(/\^/g, &quot;&amp;#916;&quot;).replace(/h/g, &quot;&amp;#248;&quot;).replace(/o/g, &quot;&amp;#176;&quot;).replace(/-/g, &quot;&amp;#8211;&quot;);
     let cx = x;
     c.fillStyle = PDF.ink;
     c.font = &quot;600 &quot; + S + &quot;px &quot; + FLAP; put(m[1], cx, y); cx += c.measureText(m[1]).width;
@@ -708,14 +999,15 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     const qs = S * .58, qy = y - S * .36;
     c.font = &quot;600 &quot; + qs + &quot;px &quot; + FLAP;
     const qcap = capOf(c, qs);
-    q.split(/(b9|&amp;#248;)/).forEach(part =&gt; {
+    // altered tones (&amp;#9837;9, &amp;#9839;11, &amp;#9837;13&amp;#8230;) get the drawn flat and sharp; &amp;#248; gets the drawn ring
+    q.split(/(&amp;#248;|[b#]\d+)/).forEach(part =&gt; {
       if (!part) return;
       c.font = &quot;600 &quot; + qs + &quot;px &quot; + FLAP;
       if (part === &quot;&amp;#248;&quot;) { cx += halfDimShape(c, cx, qy, qcap, dry) + qs * .02; return; }
-      if (part === &quot;b9&quot;) {
+      if (/^[b#]\d/.test(part)) {
         cx += qs * .02;
-        cx += flatShape(c, cx, qy - qcap * 1.02, qcap * .98, dry) + qs * .05;
-        put(&quot;9&quot;, cx, qy); cx += c.measureText(&quot;9&quot;).width;
+        cx += (part[0] === &quot;b&quot; ? flatShape(c, cx, qy - qcap * 1.02, qcap * .98, dry) : sharpShape(c, cx, qy - qcap * 1.06, qcap * 1.0, dry)) + qs * .05;
+        put(part.slice(1), cx, qy); cx += c.measureText(part.slice(1)).width;
       } else { put(part, cx, qy); cx += c.measureText(part).width; }
     });
     return cx - x;
@@ -788,7 +1080,13 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.fillText(&quot;(&quot; + state.style + &quot;)&quot;, M, M + 42);
     c.textAlign = &quot;right&quot;; c.fillText(&quot;251 Charts&quot; + (pages &gt; 1 ? &quot;  &amp;#183;  &quot; + (pageIdx + 1) + &quot;/&quot; + pages : &quot;&quot;), W - M, M + 42);
     c.textAlign = &quot;left&quot;;
-    const top = M + 62, avail = H - top - M - 24;
+    let top = M + 62;
+    if (noteText() &amp;&amp; pageIdx === 0) {
+      c.fillStyle = PDF.amber; c.font = &quot;600 12px &quot; + MONO;
+      wrap(c, noteText(), W - 2 * M).forEach((ln, i) =&gt; c.fillText(ln, M, M + 62 + i * 16));
+      top += wrap(c, noteText(), W - 2 * M).length * 16 + 6;
+    }
+    const avail = H - top - M - 24;
     const used = Math.min(perPage, lines.length - pageIdx * perPage);
     // close to a printed lead sheet: about 66 pt a line (iReal Pro-like), never more
     const lineH = Math.min(66, avail / used), S = Math.min(31, lineH * .47);
@@ -798,11 +1096,24 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.fillText(order.length + &quot; keys &amp;#183; &quot; + ORDERS[state.order].note + (state.reps === 2 ? &quot; &amp;#183; each key twice&quot; : &quot;&quot;), M, H - M + 8);
     return cv;
   }
+  // break text into lines that fit a width, at spaces
+  function wrap(c, text, width) {
+    const out = []; let cur = &quot;&quot;;
+    text.split(&quot; &quot;).forEach(w =&gt; {
+      const t = cur ? cur + &quot; &quot; + w : w;
+      if (c.measureText(t).width &gt; width &amp;&amp; cur) { out.push(cur); cur = w; } else cur = t;
+    });
+    if (cur) out.push(cur);
+    return out;
+  }
   // the on-screen chart: a real image (so press-and-hold saves it), drawn exactly like the PDF at the window&#x27;s width
   function chartImage(cssW) {
     PDF = LOOKS[state.pdf] || LOOKS.dark;
     const lines = chartLines(), M = 6, barW = (cssW - 2 * M) / 4;
-    const S = Math.max(14, Math.min(28, barW * .2)), lineH = S * 2.3, top = 58;
+    const S = Math.max(14, Math.min(28, barW * .2)), lineH = S * 2.3;
+    const mc = document.createElement(&quot;canvas&quot;).getContext(&quot;2d&quot;); mc.font = &quot;600 11px &quot; + MONO;
+    const noteLines = noteText() ? wrap(mc, noteText(), cssW - 2 * M) : [];
+    const top = 58 + (noteLines.length ? noteLines.length * 15 + 6 : 0);
     const H = Math.ceil(top + lines.length * lineH + 4);
     const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
     const cv = document.createElement(&quot;canvas&quot;);
@@ -816,8 +1127,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     while (c.measureText(title).width &gt; cssW - 2 * M &amp;&amp; title.length &gt; 4) title = title.slice(0, -2) + &quot;&amp;#8230;&quot;;
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = &quot;600 9.5px &quot; + MONO;
-    const bars = order.length * barsPerKey() * state.reps;
+    const bars = chartBars().length * state.reps;
     c.fillText((order.length + &quot; keys &amp;#183; &quot; + bars + &quot; bars &amp;#183; &quot; + state.style).toUpperCase(), M, 42);
+    c.fillStyle = PDF.amber; c.font = &quot;600 11px &quot; + MONO;
+    noteLines.forEach((ln, i) =&gt; c.fillText(ln, M, 60 + i * 15));
     drawLines(c, lines, M, top, barW, lineH, S, Math.max(9, S * .42), lines.length - 1, 0);
     return cv.toDataURL(&quot;image/png&quot;);
   }
@@ -827,7 +1140,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     PDF = LOOKS[state.pdf] || LOOKS.dark;
     const lines = chartLines(), perPage = 12, pages = Math.max(1, Math.ceil(lines.length / perPage));
     const doc = new window.jspdf.jsPDF({ unit: &quot;pt&quot;, format: &quot;letter&quot;, compress: true });
-    doc.setProperties({ title: chartTitle(), subject: &quot;ii-V-I practice chart&quot;, creator: &quot;251 Charts&quot; });
+    doc.setProperties({ title: chartTitle(), subject: &quot;Practice chart&quot;, creator: &quot;251 Charts&quot; });
     for (let p = 0; p &lt; pages; p++) {
       if (p) doc.addPage();
       const cv = drawPage(lines, p, pages, perPage, 3);
@@ -875,6 +1188,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   };
 
   renderChips();
+  renderRecipes(-1);
   deal();
   render();
   // redraw once the fonts arrive, and when the window changes width
