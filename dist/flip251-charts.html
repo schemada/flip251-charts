@@ -226,11 +226,15 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       </div>
     </div>
     <div class="ctl">
-      <span class="cap">Order</span>
-      <div class="rocker" role="group" aria-label="Order">
-        <button id="o-random" aria-pressed="false">Shuffle</button>
-        <button id="o-cycle" aria-pressed="true">Cycle 4ths</button>
-      </div>
+      <label class="cap" for="order">Order</label>
+      <select class="field" id="order" aria-label="Order of keys">
+        <option value="cycle">Cycle of 4ths</option>
+        <option value="wd">Down whole steps</option>
+        <option value="hd">Down half steps</option>
+        <option value="m3">Up minor 3rds</option>
+        <option value="M3">Down major 3rds</option>
+        <option value="random">Shuffled</option>
+      </select>
     </div>
     <div class="ctl" id="startCtl">
       <label class="cap" for="start">Start on</label>
@@ -337,6 +341,14 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const BY_FOURTHS = [0,5,10,3,8,1,6,11,4,9,2,7];
   const MAJ = { 0:[0,0], 1:[1,-1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[4,-1], 7:[4,0], 8:[5,-1], 9:[5,0], 10:[6,-1], 11:[6,0] };
   const MIN = { 0:[0,0], 1:[0,1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[3,1], 7:[4,0], 8:[4,1], 9:[5,0], 10:[6,-1], 11:[6,0] };
+  const ORDERS = {
+    cycle:  { step: 5,  title: "Cycle",        note: "cycle of 4ths" },
+    wd:     { step: -2, title: "Whole Steps",  note: "down whole steps" },
+    hd:     { step: -1, title: "Half Steps",   note: "down half steps" },
+    m3:     { step: 3,  title: "Minor 3rds",   note: "up minor 3rds" },
+    M3:     { step: -4, title: "Major 3rds",   note: "down major 3rds" },
+    random: { step: 0,  title: "Shuffled",     note: "shuffled" }
+  };
   const PRESETS = {
     major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10] },
     minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
@@ -358,7 +370,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (PROGS[s.prog]) state.prog = s.prog;
     ["minor", "short", "mix"].forEach(k => { if (typeof s[k] === "boolean") state[k] = s[k]; });
     if (["hold","vi"].includes(s.turn)) state.turn = s.turn;
-    if (["random","cycle"].includes(s.order)) state.order = s.order;
+    if (ORDERS[s.order]) state.order = s.order;
     if (s.start === -1 || (Number.isInteger(s.start) && s.start >= 0 && s.start < 12)) state.start = s.start;
     ["domV","domVI"].forEach(k => { if (["plain","ext","b9","alt"].includes(s[k])) state[k] = s[k]; });
     if ([1,2].includes(s.reps)) state.reps = s.reps;
@@ -435,12 +447,24 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function firstKey() { const s = sel(); return s.includes(state.start) ? state.start : s[Math.floor(Math.random() * s.length)]; }
   // shuffle: every key at random. cycle: round the 4ths from the "Start on" key
+  // Every order except Shuffled walks from the "Start on" key by a fixed interval. Whole steps, minor 3rds and
+  // major 3rds close up before reaching all 12 keys; when the next key has already been played, the walk slips a
+  // half step (in the same direction) to the nearest unused key and carries on, so every key still comes up once.
+  // From C, down whole steps: C B♭ A♭ G♭ E D | B A G F E♭ D♭. Keys that are switched off are simply skipped.
+  function walk(start, step) {
+    const path = [start], dir = step > 0 ? 1 : -1;
+    let cur = start;
+    while (path.length < 12) {
+      let nxt = ((cur + step) % 12 + 12) % 12;
+      while (path.includes(nxt)) nxt = ((nxt + dir) % 12 + 12) % 12;
+      path.push(nxt); cur = nxt;
+    }
+    return path;
+  }
   function deal() {
-    const s = sel().slice();
-    if (state.order === "cycle") {
-      const start = firstKey();
-      order = s.sort((a, b) => ((FOURTHS(a) - FOURTHS(start) + 12) % 12) - ((FOURTHS(b) - FOURTHS(start) + 12) % 12));
-    } else order = shuffle(s);
+    const s = sel();
+    if (state.order === "random") order = shuffle(s.slice());
+    else order = walk(firstKey(), ORDERS[state.order].step).filter(pc => s.includes(pc));
     rollMix();
   }
   // "Random mix": every dominant gets its own type, re-rolled with each shuffle
@@ -474,7 +498,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   function defaultTitle() {
     const p = PROGS[state.prog];
-    return p.name + (p.minor ? (state.minor ? " Minor" : " Major") : "") + " " + (state.short ? "Short" : "Long") + " (" + (state.order === "cycle" ? "Cycle" : "Shuffled") + ")";
+    return p.name + (p.minor ? (state.minor ? " Minor" : " Major") : "") + " " + (state.short ? "Short" : "Long") + " (" + ORDERS[state.order].title + ")";
   }
   function chartTitle() { return ($("title").value.trim() || defaultTitle()).replace(/=/g, "-"); }
   function url() {
@@ -547,10 +571,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     $("l-short").textContent = "Short · " + n[1];
     press("t-hold", state.turn === "hold"); press("t-vi", state.turn === "vi");
     $("turnCtl").classList.toggle("off", !(state.prog === "251" && !state.short));
-    press("o-random", state.order === "random"); press("o-cycle", state.order === "cycle");
+    $("order").value = state.order;
     // "Start on" only matters when cycling; it stays in place but greys out for Shuffle
-    $("startCtl").classList.toggle("off", state.order !== "cycle");
-    $("start").disabled = state.order !== "cycle";
+    $("startCtl").classList.toggle("off", state.order === "random");
+    $("start").disabled = state.order === "random";
     ["plain","ext","b9","alt"].forEach(d => { press("dv-" + d, state.domV === d); press("dvi-" + d, state.domVI === d); });
     press("m-set", !state.mix); press("m-mix", state.mix);
     $("vCap").textContent = state.prog === "bd" ? "♭VII7 sound" : "V7 sound";
@@ -571,8 +595,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $("l-short").onclick = () => { state.short = true; changed(false); };
   $("t-hold").onclick = () => { state.turn = "hold"; changed(false); };
   $("t-vi").onclick = () => { state.turn = "vi"; changed(false); };
-  $("o-random").onclick = () => { state.order = "random"; changed(true); };
-  $("o-cycle").onclick = () => { state.order = "cycle"; changed(true); };
+  $("order").onchange = e => { state.order = e.target.value; changed(true); };
   ["plain","ext","b9","alt"].forEach(d => {
     $("dv-" + d).onclick = () => { state.domV = d; changed(false); };
     $("dvi-" + d).onclick = () => { state.domVI = d; changed(false); };
@@ -592,11 +615,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $("title").oninput = () => render();
   // Shuffle again re-deals everything; while cycling it also picks a new starting key
   $("reshuffle").onclick = () => {
-    if (state.order === "cycle") {
+    if (state.order !== "random") {
       const s = sel().filter(p => p !== order[0]), pool = s.length ? s : sel();
       state.start = pool[Math.floor(Math.random() * pool.length)]; save(); renderChips();
     }
-    deal(); render(); status(state.order === "cycle" ? "New starting key." : "Shuffled. New key order.");
+    deal(); render(); status(state.order !== "random" ? "New starting key." : "Shuffled. New key order.");
   };
 
   const statusEl = $("status");
@@ -790,7 +813,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     const startLine = pageIdx * perPage;
     drawLines(c, lines.slice(startLine, startLine + perPage), M, top, (W - 2 * M) / 4, lineH, S, 10.5, lines.length - 1, startLine);
     c.fillStyle = PDF.dim; c.font = "500 9px " + MONO;
-    c.fillText(order.length + " keys · " + (state.order === "cycle" ? "cycle of 4ths" : "shuffled") + (state.reps === 2 ? " · each key twice" : ""), M, H - M + 8);
+    c.fillText(order.length + " keys · " + ORDERS[state.order].note + (state.reps === 2 ? " · each key twice" : ""), M, H - M + 8);
     return cv;
   }
   // the on-screen chart: a real image (so press-and-hold saves it), drawn exactly like the PDF at the window's width

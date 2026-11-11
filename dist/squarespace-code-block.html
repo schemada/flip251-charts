@@ -208,11 +208,15 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot;&gt;
-      &lt;span class=&quot;cap&quot;&gt;Order&lt;/span&gt;
-      &lt;div class=&quot;rocker&quot; role=&quot;group&quot; aria-label=&quot;Order&quot;&gt;
-        &lt;button id=&quot;o-random&quot; aria-pressed=&quot;false&quot;&gt;Shuffle&lt;/button&gt;
-        &lt;button id=&quot;o-cycle&quot; aria-pressed=&quot;true&quot;&gt;Cycle 4ths&lt;/button&gt;
-      &lt;/div&gt;
+      &lt;label class=&quot;cap&quot; for=&quot;order&quot;&gt;Order&lt;/label&gt;
+      &lt;select class=&quot;field&quot; id=&quot;order&quot; aria-label=&quot;Order of keys&quot;&gt;
+        &lt;option value=&quot;cycle&quot;&gt;Cycle of 4ths&lt;/option&gt;
+        &lt;option value=&quot;wd&quot;&gt;Down whole steps&lt;/option&gt;
+        &lt;option value=&quot;hd&quot;&gt;Down half steps&lt;/option&gt;
+        &lt;option value=&quot;m3&quot;&gt;Up minor 3rds&lt;/option&gt;
+        &lt;option value=&quot;M3&quot;&gt;Down major 3rds&lt;/option&gt;
+        &lt;option value=&quot;random&quot;&gt;Shuffled&lt;/option&gt;
+      &lt;/select&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot; id=&quot;startCtl&quot;&gt;
       &lt;label class=&quot;cap&quot; for=&quot;start&quot;&gt;Start on&lt;/label&gt;
@@ -319,6 +323,14 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const BY_FOURTHS = [0,5,10,3,8,1,6,11,4,9,2,7];
   const MAJ = { 0:[0,0], 1:[1,-1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[4,-1], 7:[4,0], 8:[5,-1], 9:[5,0], 10:[6,-1], 11:[6,0] };
   const MIN = { 0:[0,0], 1:[0,1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[3,1], 7:[4,0], 8:[4,1], 9:[5,0], 10:[6,-1], 11:[6,0] };
+  const ORDERS = {
+    cycle:  { step: 5,  title: &quot;Cycle&quot;,        note: &quot;cycle of 4ths&quot; },
+    wd:     { step: -2, title: &quot;Whole Steps&quot;,  note: &quot;down whole steps&quot; },
+    hd:     { step: -1, title: &quot;Half Steps&quot;,   note: &quot;down half steps&quot; },
+    m3:     { step: 3,  title: &quot;Minor 3rds&quot;,   note: &quot;up minor 3rds&quot; },
+    M3:     { step: -4, title: &quot;Major 3rds&quot;,   note: &quot;down major 3rds&quot; },
+    random: { step: 0,  title: &quot;Shuffled&quot;,     note: &quot;shuffled&quot; }
+  };
   const PRESETS = {
     major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10] },
     minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
@@ -340,7 +352,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (PROGS[s.prog]) state.prog = s.prog;
     [&quot;minor&quot;, &quot;short&quot;, &quot;mix&quot;].forEach(k =&gt; { if (typeof s[k] === &quot;boolean&quot;) state[k] = s[k]; });
     if ([&quot;hold&quot;,&quot;vi&quot;].includes(s.turn)) state.turn = s.turn;
-    if ([&quot;random&quot;,&quot;cycle&quot;].includes(s.order)) state.order = s.order;
+    if (ORDERS[s.order]) state.order = s.order;
     if (s.start === -1 || (Number.isInteger(s.start) &amp;&amp; s.start &gt;= 0 &amp;&amp; s.start &lt; 12)) state.start = s.start;
     [&quot;domV&quot;,&quot;domVI&quot;].forEach(k =&gt; { if ([&quot;plain&quot;,&quot;ext&quot;,&quot;b9&quot;,&quot;alt&quot;].includes(s[k])) state[k] = s[k]; });
     if ([1,2].includes(s.reps)) state.reps = s.reps;
@@ -417,12 +429,24 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   function shuffle(a) { for (let i = a.length - 1; i &gt; 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function firstKey() { const s = sel(); return s.includes(state.start) ? state.start : s[Math.floor(Math.random() * s.length)]; }
   // shuffle: every key at random. cycle: round the 4ths from the &quot;Start on&quot; key
+  // Every order except Shuffled walks from the &quot;Start on&quot; key by a fixed interval. Whole steps, minor 3rds and
+  // major 3rds close up before reaching all 12 keys; when the next key has already been played, the walk slips a
+  // half step (in the same direction) to the nearest unused key and carries on, so every key still comes up once.
+  // From C, down whole steps: C B&amp;#9837; A&amp;#9837; G&amp;#9837; E D | B A G F E&amp;#9837; D&amp;#9837;. Keys that are switched off are simply skipped.
+  function walk(start, step) {
+    const path = [start], dir = step &gt; 0 ? 1 : -1;
+    let cur = start;
+    while (path.length &lt; 12) {
+      let nxt = ((cur + step) % 12 + 12) % 12;
+      while (path.includes(nxt)) nxt = ((nxt + dir) % 12 + 12) % 12;
+      path.push(nxt); cur = nxt;
+    }
+    return path;
+  }
   function deal() {
-    const s = sel().slice();
-    if (state.order === &quot;cycle&quot;) {
-      const start = firstKey();
-      order = s.sort((a, b) =&gt; ((FOURTHS(a) - FOURTHS(start) + 12) % 12) - ((FOURTHS(b) - FOURTHS(start) + 12) % 12));
-    } else order = shuffle(s);
+    const s = sel();
+    if (state.order === &quot;random&quot;) order = shuffle(s.slice());
+    else order = walk(firstKey(), ORDERS[state.order].step).filter(pc =&gt; s.includes(pc));
     rollMix();
   }
   // &quot;Random mix&quot;: every dominant gets its own type, re-rolled with each shuffle
@@ -456,7 +480,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   function defaultTitle() {
     const p = PROGS[state.prog];
-    return p.name + (p.minor ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;) + &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) + &quot; (&quot; + (state.order === &quot;cycle&quot; ? &quot;Cycle&quot; : &quot;Shuffled&quot;) + &quot;)&quot;;
+    return p.name + (p.minor ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;) + &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) + &quot; (&quot; + ORDERS[state.order].title + &quot;)&quot;;
   }
   function chartTitle() { return ($(&quot;title&quot;).value.trim() || defaultTitle()).replace(/=/g, &quot;-&quot;); }
   function url() {
@@ -529,10 +553,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     $(&quot;l-short&quot;).textContent = &quot;Short &amp;#183; &quot; + n[1];
     press(&quot;t-hold&quot;, state.turn === &quot;hold&quot;); press(&quot;t-vi&quot;, state.turn === &quot;vi&quot;);
     $(&quot;turnCtl&quot;).classList.toggle(&quot;off&quot;, !(state.prog === &quot;251&quot; &amp;&amp; !state.short));
-    press(&quot;o-random&quot;, state.order === &quot;random&quot;); press(&quot;o-cycle&quot;, state.order === &quot;cycle&quot;);
+    $(&quot;order&quot;).value = state.order;
     // &quot;Start on&quot; only matters when cycling; it stays in place but greys out for Shuffle
-    $(&quot;startCtl&quot;).classList.toggle(&quot;off&quot;, state.order !== &quot;cycle&quot;);
-    $(&quot;start&quot;).disabled = state.order !== &quot;cycle&quot;;
+    $(&quot;startCtl&quot;).classList.toggle(&quot;off&quot;, state.order === &quot;random&quot;);
+    $(&quot;start&quot;).disabled = state.order === &quot;random&quot;;
     [&quot;plain&quot;,&quot;ext&quot;,&quot;b9&quot;,&quot;alt&quot;].forEach(d =&gt; { press(&quot;dv-&quot; + d, state.domV === d); press(&quot;dvi-&quot; + d, state.domVI === d); });
     press(&quot;m-set&quot;, !state.mix); press(&quot;m-mix&quot;, state.mix);
     $(&quot;vCap&quot;).textContent = state.prog === &quot;bd&quot; ? &quot;&amp;#9837;VII7 sound&quot; : &quot;V7 sound&quot;;
@@ -553,8 +577,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $(&quot;l-short&quot;).onclick = () =&gt; { state.short = true; changed(false); };
   $(&quot;t-hold&quot;).onclick = () =&gt; { state.turn = &quot;hold&quot;; changed(false); };
   $(&quot;t-vi&quot;).onclick = () =&gt; { state.turn = &quot;vi&quot;; changed(false); };
-  $(&quot;o-random&quot;).onclick = () =&gt; { state.order = &quot;random&quot;; changed(true); };
-  $(&quot;o-cycle&quot;).onclick = () =&gt; { state.order = &quot;cycle&quot;; changed(true); };
+  $(&quot;order&quot;).onchange = e =&gt; { state.order = e.target.value; changed(true); };
   [&quot;plain&quot;,&quot;ext&quot;,&quot;b9&quot;,&quot;alt&quot;].forEach(d =&gt; {
     $(&quot;dv-&quot; + d).onclick = () =&gt; { state.domV = d; changed(false); };
     $(&quot;dvi-&quot; + d).onclick = () =&gt; { state.domVI = d; changed(false); };
@@ -574,11 +597,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $(&quot;title&quot;).oninput = () =&gt; render();
   // Shuffle again re-deals everything; while cycling it also picks a new starting key
   $(&quot;reshuffle&quot;).onclick = () =&gt; {
-    if (state.order === &quot;cycle&quot;) {
+    if (state.order !== &quot;random&quot;) {
       const s = sel().filter(p =&gt; p !== order[0]), pool = s.length ? s : sel();
       state.start = pool[Math.floor(Math.random() * pool.length)]; save(); renderChips();
     }
-    deal(); render(); status(state.order === &quot;cycle&quot; ? &quot;New starting key.&quot; : &quot;Shuffled. New key order.&quot;);
+    deal(); render(); status(state.order !== &quot;random&quot; ? &quot;New starting key.&quot; : &quot;Shuffled. New key order.&quot;);
   };
 
   const statusEl = $(&quot;status&quot;);
@@ -772,7 +795,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     const startLine = pageIdx * perPage;
     drawLines(c, lines.slice(startLine, startLine + perPage), M, top, (W - 2 * M) / 4, lineH, S, 10.5, lines.length - 1, startLine);
     c.fillStyle = PDF.dim; c.font = &quot;500 9px &quot; + MONO;
-    c.fillText(order.length + &quot; keys &amp;#183; &quot; + (state.order === &quot;cycle&quot; ? &quot;cycle of 4ths&quot; : &quot;shuffled&quot;) + (state.reps === 2 ? &quot; &amp;#183; each key twice&quot; : &quot;&quot;), M, H - M + 8);
+    c.fillText(order.length + &quot; keys &amp;#183; &quot; + ORDERS[state.order].note + (state.reps === 2 ? &quot; &amp;#183; each key twice&quot; : &quot;&quot;), M, H - M + 8);
     return cv;
   }
   // the on-screen chart: a real image (so press-and-hold saves it), drawn exactly like the PDF at the window&#x27;s width
