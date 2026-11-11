@@ -1,0 +1,842 @@
+<title>Flip 251 Charts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Music&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: the Flip 251 clock's sibling — same molded case. Settings on the face, a dark lead-sheet window
+   showing the exact chart (key names under each key's first bar, like iReal Pro), and ways out underneath. */
+:root {
+  --bg: #e7e2d8;
+  --bg-ink: #6f675a;
+  --case-hi: #f6f0e3;
+  --case: #e4dac6;
+  --case-lo: #b9ab90;
+  --bezel: #1d1b19;
+  --sheet: #2a2826;
+  --ink: #f1ead8;
+  --ink-dim: #b8ae98;
+  --amber: #e2a23b;
+  --amber-lo: #a8701c;
+  --label: #5c5242;
+  --cap-hi: #fbf6ea;
+  --cap-lo: #e1d6c0;
+  --cap-edge: #8a7c62;
+  --font-flap: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-label: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-music: "Noto Music", "Segoe UI Symbol", "Apple Symbols", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #1a1916; --bg-ink: #8f8676; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #1a1916; --bg-ink: #8f8676; color-scheme: dark; }
+
+body {
+  background: var(--bg); color: var(--bg-ink); font-family: var(--font-label);
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  padding-block: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box; -webkit-tap-highlight-color: transparent;
+}
+button, select, input { font-family: inherit; }
+button { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+
+.case {
+  width: 100%; max-width: 640px; box-sizing: border-box;
+  background: linear-gradient(180deg, var(--case-hi) 0%, var(--case) 45%, var(--case-lo) 100%);
+  border-radius: 26px; padding: 18px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.8), inset 0 -4px 8px rgba(0,0,0,.12), 0 18px 30px -12px rgba(0,0,0,.45), 0 2px 0 #9d8f74;
+  display: grid; gap: 16px;
+}
+.plate { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px; }
+.brand { font: 700 15px var(--font-flap); letter-spacing: .32em; color: var(--label); text-transform: uppercase; }
+.model { font: 500 10px var(--font-label); letter-spacing: .14em; color: var(--label); opacity: .75; }
+.lede { margin: -8px 6px 0; font: 500 12px/1.55 var(--font-label); color: var(--label); max-width: 60ch; }
+
+/* ---------- controls ---------- */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 12px; align-content: start; }
+.right { display: grid; gap: 14px; align-content: start; min-width: 0; }
+/* tablet portrait: three settings to a row */
+@media (min-width: 600px) and (max-width: 959px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* iPad landscape and desktop: settings on the left, the chart stays in view on the right */
+@media (min-width: 960px) {
+  .case { max-width: 1180px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); column-gap: 22px; }
+  .plate, .lede { grid-column: 1 / -1; }
+  .right { position: sticky; top: 16px; align-self: start; }
+}
+.ctl { display: grid; gap: 6px; align-content: start; justify-items: start; min-width: 0; }
+.ctl .field, .ctl .chips { justify-self: stretch; }
+.cap { font: 600 9.5px var(--font-label); letter-spacing: .16em; color: var(--label); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.rocker {
+  display: flex; padding: 3px; gap: 3px; border-radius: 9px; width: 100%; box-sizing: border-box;
+  background: linear-gradient(180deg, #8d7f66, #c9bca2);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.7);
+}
+.rocker button {
+  flex: 1 1 0; min-width: 0; border: 0; cursor: pointer; border-radius: 6px; padding: 9px 4px;
+  font: 600 10.5px var(--font-label); letter-spacing: .04em; text-transform: uppercase;
+  color: #6c6150; background: transparent; white-space: nowrap;
+}
+.rocker button[aria-pressed="true"] { background: linear-gradient(180deg, var(--cap-hi), var(--cap-lo)); color: #2b2620; box-shadow: 0 2px 0 var(--cap-edge), inset 0 1px 0 #fff; }
+.rocker .sym, .chip s, .sheet s { text-decoration: none; font-family: var(--font-music); -webkit-text-stroke: .05em currentColor; }
+.chips { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.chip {
+  border: 1px solid rgba(92,82,66,.35); background: transparent; border-radius: 6px; cursor: pointer;
+  height: 36px; font: 600 18px/1 var(--font-flap); color: var(--label);
+}
+.chip s { font-size: .78em; vertical-align: .38em; margin-left: .02em; }
+.chip[aria-pressed="true"] { background: var(--sheet); border-color: var(--sheet); color: var(--ink); box-shadow: 0 2px 0 #000; }
+.field {
+  border: 0; border-radius: 8px; padding: 9px 12px; width: 100%; box-sizing: border-box;
+  background: var(--cap-hi); color: #2b2620; font: 600 13px var(--font-label);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.7);
+}
+select.field { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #6c6150 50%), linear-gradient(135deg, #6c6150 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 28px; }
+.wide { grid-column: 1 / -1; }
+.ctl.off { opacity: .4; }
+.rocker.prog button { flex: 1 1 auto; text-transform: none; letter-spacing: .01em; font: 600 15px var(--font-flap); padding: 8px 8px; }
+.rocker.wrap { flex-wrap: wrap; }
+.ctl.off .rocker, .ctl.off .field { pointer-events: none; }
+.rocker button:focus-visible, .chip:focus-visible, .field:focus-visible, .btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* ---------- the chart window ---------- */
+.window {
+  /* the chart's own colours: dark like the clock window, or "light" like a printed page */
+  --w-bg: var(--bezel); --w-ink: var(--ink); --w-dim: var(--ink-dim); --w-rule: var(--ink-dim); --w-bar: var(--ink-dim); --w-acc: var(--amber);
+  background: var(--w-bg); border-radius: 14px; padding: 14px 12px 12px; overflow: hidden;
+  transition: background .2s;
+  box-shadow: inset 0 3px 10px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.7);
+  display: grid; gap: 10px; min-width: 0;
+}
+.window.light {
+  --w-bg: #ffffff; --w-ink: #141414; --w-dim: #555049; --w-rule: #141414; --w-bar: #141414; --w-acc: #a8261b;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,.2), 0 1px 0 rgba(255,255,255,.7);
+}
+.sheethead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 10px; padding: 0 4px; min-width: 0; }
+.sheethead .t { font: 600 18px var(--font-flap); color: var(--w-ink); letter-spacing: .04em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheethead .m { font: 600 9.5px var(--font-label); letter-spacing: .14em; color: var(--w-dim); white-space: nowrap; text-transform: uppercase; }
+.sheetimg { display: block; width: 100%; height: auto; -webkit-touch-callout: default; -webkit-user-select: auto; user-select: auto; }
+.line { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; }
+.bar {
+  border-left: 1.5px solid var(--w-rule); padding: 8px 6px 6px; min-width: 0; overflow: hidden;
+  display: grid; grid-template-rows: auto 14px; gap: 4px;
+}
+.bar .chs {
+  display: flex; gap: 6px; align-items: baseline; justify-content: space-around;
+  font: 600 clamp(15px, 4.2vw, 21px)/1 var(--font-flap); color: var(--w-ink); white-space: nowrap;
+}
+.bar .klab { font: 600 10.5px/14px var(--font-label); color: var(--w-acc); letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { position: relative; }
+/* barlines, matching the PDF and iReal Pro: double at each new key, repeat signs when keys play twice */
+.bar.seg { border-left: 4px double var(--w-bar); }
+.bar.es { border-right: 1.5px solid var(--w-rule); }
+.bar.ed { border-right: 4px double var(--w-bar); }
+.bar.ef { border-right: 3px solid var(--w-bar); }
+.bar.ef::after { content: ""; position: absolute; top: 0; bottom: 0; right: 3px; width: 1px; background: var(--w-bar); }
+.bar.ro::before, .bar.rc::after, .bar.er::after {
+  content: ""; position: absolute; top: 14px; width: 4px; height: 15px;
+  background: radial-gradient(circle, var(--w-bar) 1.7px, transparent 2.2px) 0 0 / 4px 7.5px repeat-y;
+}
+.bar.ro::before { left: 2px; }
+.bar.rc::after, .bar.er::after { right: 2px; }
+.bar.ro .chs { padding-left: 6px; }
+.ch { white-space: nowrap; }
+.bar i { font-style: normal; font-size: .62em; vertical-align: .55em; margin-left: .03em; }
+.bar s { font-size: .62em; vertical-align: .5em; }
+.bar i s { font-size: 1em; vertical-align: 0; }
+.bar .sim { color: var(--w-dim); font-weight: 500; }
+
+/* ---------- actions ---------- */
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  border: 0; cursor: pointer; border-radius: 9px; padding: 12px 16px;
+  font: 600 11.5px var(--font-label); letter-spacing: .1em; text-transform: uppercase; text-decoration: none;
+  background: linear-gradient(180deg, var(--cap-hi), var(--cap-lo)); color: #2b2620;
+  box-shadow: 0 3px 0 var(--cap-edge), inset 0 1px 0 #fff;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn.slim { padding: 10px 12px; font-size: 10.5px; width: 100%; justify-content: center; }
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--cap-edge), inset 0 1px 0 #fff; }
+.btn[disabled] { opacity: .55; cursor: progress; }
+.btn.primary { background: linear-gradient(180deg, #f0bd62, var(--amber)); color: #4a3207; box-shadow: 0 3px 0 #7d5414, inset 0 1px 0 rgba(255,255,255,.5); }
+.note { font: 500 11px/1.6 var(--font-label); color: var(--label); margin: 0; max-width: 64ch; }
+.status { font: 600 11px var(--font-label); color: var(--amber-lo); min-height: 1.4em; margin: 0; }
+textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: vertical; word-break: break-all; }
+.raw summary { cursor: pointer; font: 600 9.5px var(--font-label); letter-spacing: .16em; text-transform: uppercase; color: var(--label); }
+.raw[open] summary { margin-bottom: 8px; }
+
+@media (max-width: 420px) {
+  .case { padding: 14px 10px; border-radius: 22px; }
+  .window { padding: 10px 6px; }
+  .bar { padding: 7px 2px 5px; }
+  .bar .chs { gap: 3px; font-size: 15px; }
+  .bar .klab { font-size: 9.5px; }
+  .rocker button { padding: 9px 2px; font-size: 10px; letter-spacing: .02em; }
+  .rocker.prog button { padding: 8px 6px; font-size: 14px; }
+  .field { padding: 9px 10px; font-size: 12px; }
+  .case { gap: 14px; }
+}
+</style>
+
+<div class="case">
+  <div class="plate"><span class="brand">ii · V · I → iReal</span><span class="model">CHART 251</span></div>
+  <p class="lede">Design a custom exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF.</p>
+
+  <div class="grid" aria-label="Settings">
+    <div class="ctl wide">
+      <span class="cap">Progression</span>
+      <div class="rocker prog wrap" role="group" aria-label="Progression">
+        <button id="g-251" aria-pressed="true">ii–V–I</button>
+        <button id="g-25" aria-pressed="false">ii–V</button>
+        <button id="g-3625" aria-pressed="false">iii–VI–ii–V</button>
+        <button id="g-bd" aria-pressed="false">Backdoor ii–V</button>
+      </div>
+    </div>
+    <div class="ctl" id="qCtl">
+      <span class="cap" id="qCap">Quality</span>
+      <div class="rocker" role="group" aria-label="Major or minor">
+        <button id="q-major" aria-pressed="true">Major</button>
+        <button id="q-minor" aria-pressed="false">Minor</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="cap">Length (bars)</span>
+      <div class="rocker" role="group" aria-label="Long or short">
+        <button id="l-long" aria-pressed="true">Long</button>
+        <button id="l-short" aria-pressed="false">Short</button>
+      </div>
+    </div>
+    <div class="ctl" id="turnCtl">
+      <span class="cap">Bar 4</span>
+      <div class="rocker" role="group" aria-label="Fourth bar">
+        <button id="t-hold" aria-pressed="true">Hold I</button>
+        <button id="t-vi" aria-pressed="false">VI7</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="cap">Order</span>
+      <div class="rocker" role="group" aria-label="Order">
+        <button id="o-random" aria-pressed="false">Shuffle</button>
+        <button id="o-cycle" aria-pressed="true">Cycle 4ths</button>
+      </div>
+    </div>
+    <div class="ctl" id="startCtl">
+      <label class="cap" for="start">Start on</label>
+      <select class="field" id="start" aria-label="First key"></select>
+    </div>
+    <div class="ctl">
+      <span class="cap">Dominants</span>
+      <div class="rocker" role="group" aria-label="Dominant chord types">
+        <button id="m-set" aria-pressed="true">As chosen</button>
+        <button id="m-mix" aria-pressed="false">Random</button>
+      </div>
+    </div>
+    <div class="ctl" id="vCtl">
+      <span class="cap" id="vCap">V7 sound</span>
+      <div class="rocker" role="group" aria-label="V7 sound">
+        <button id="dv-plain" aria-pressed="false">7</button>
+        <button id="dv-ext" aria-pressed="true">13</button>
+        <button id="dv-b9" aria-pressed="false">7<span class="sym">♭</span>9</button>
+        <button id="dv-alt" aria-pressed="false">7alt</button>
+      </div>
+    </div>
+    <div class="ctl" id="viCtl">
+      <span class="cap">VI7 sound</span>
+      <div class="rocker" role="group" aria-label="VI7 sound">
+        <button id="dvi-plain" aria-pressed="false">7</button>
+        <button id="dvi-ext" aria-pressed="true">13</button>
+        <button id="dvi-b9" aria-pressed="false">7<span class="sym">♭</span>9</button>
+        <button id="dvi-alt" aria-pressed="false">7alt</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="cap">Each key</span>
+      <div class="rocker" role="group" aria-label="Times through each key">
+        <button id="r-1" aria-pressed="true">Once</button>
+        <button id="r-2" aria-pressed="false">Twice</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="cap">iReal style</span>
+      <select class="field" id="style" aria-label="iReal Pro style">
+        <option>Medium Swing</option>
+        <option>Up Tempo Swing</option>
+        <option>Medium Up Swing</option>
+        <option>Ballad</option>
+        <option>Bossa Nova</option>
+        <option>Latin</option>
+        <option>Even 8ths</option>
+        <option>Funk</option>
+      </select>
+    </div>
+    <div class="ctl wide">
+      <span class="cap" id="keysCap">Keys</span>
+      <div class="rocker" role="group" aria-label="Key presets">
+        <button id="p-all" aria-pressed="true">All 12</button>
+        <button id="p-flat" aria-pressed="false"><span class="sym">♭</span> keys</button>
+        <button id="p-sharp" aria-pressed="false"><span class="sym">♯</span> keys</button>
+        <button id="p-start" aria-pressed="false">Starter</button>
+      </div>
+      <div class="chips" id="chips" role="group" aria-label="Keys to include"></div>
+    </div>
+    <div class="ctl">
+      <span class="cap">Chart look</span>
+      <div class="rocker" role="group" aria-label="Chart colours, on screen and in the PDF">
+        <button id="pdf-dark" aria-pressed="true">Dark</button>
+        <button id="pdf-light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="cap">Key order</span>
+      <button class="btn slim" id="reshuffle">Shuffle again</button>
+    </div>
+    <div class="ctl wide">
+      <label class="cap" for="title">Chart title</label>
+      <input class="field" id="title" maxlength="60" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="right">
+  <div class="window" aria-label="Chart preview">
+    <img class="sheetimg" id="sheetImg" alt="">
+  </div>
+
+  <div class="actions">
+    <a class="btn primary" id="open" href="#">Open in iReal Pro</a>
+    <button class="btn" id="copy">Copy iReal link</button>
+    <button class="btn" id="dl">Download PDF</button>
+  </div>
+  <p class="status" id="status" role="status"></p>
+  <p class="note"><b>Getting it into iReal Pro:</b> on a phone or tablet with iReal Pro installed, tap <b>Open in iReal Pro</b>. If nothing happens, tap <b>Copy iReal link</b>, paste it into your browser's address bar and go. Set your tempo in iReal Pro after importing. <b>Download PDF</b> saves a printable lead sheet of the same chart. You can also press and hold the chart to save it as an image.</p>
+  <details class="raw"><summary>Show the iReal link</summary><textarea class="field" id="link" readonly aria-label="iReal Pro link"></textarea></details>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ---------- theory (same spelling rules as Flip 251) ---------- */
+  const LETTERS = ["C","D","E","F","G","A","B"], NAT = [0,2,4,5,7,9,11];
+  const ACC = { "-2":"𝄫", "-1":"♭", "0":"", "1":"♯", "2":"𝄪" };
+  const FOURTHS = pc => (pc * 5) % 12;
+  const BY_FOURTHS = [0,5,10,3,8,1,6,11,4,9,2,7];
+  const MAJ = { 0:[0,0], 1:[1,-1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[4,-1], 7:[4,0], 8:[5,-1], 9:[5,0], 10:[6,-1], 11:[6,0] };
+  const MIN = { 0:[0,0], 1:[0,1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[3,1], 7:[4,0], 8:[4,1], 9:[5,0], 10:[6,-1], 11:[6,0] };
+  const PRESETS = {
+    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], flat: [5,10,3,8,1,6], sharp: [7,2,9,4,11,6], start: [0,5,7,10] },
+    minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], flat: [2,7,0,5,10,3], sharp: [4,11,6,1,8,3], start: [9,2,4,0] }
+  };
+  // progressions: name, whether minor is available, bars per key in long / short
+  const PROGS = {
+    "251":  { name: "ii-V-I",        minor: true,  bars: [4, 2] },
+    "25":   { name: "ii-V",          minor: true,  bars: [2, 1] },
+    "bd":   { name: "Backdoor ii-V", minor: false, bars: [4, 2] },
+    "3625": { name: "iii-VI-ii-V",   minor: false, bars: [4, 2] }
+  };
+  const state = {
+    prog: "251", minor: false, short: false, turn: "hold", order: "cycle", start: 0, mix: false,
+    domV: "ext", domVI: "ext", reps: 1, style: "Medium Swing", pdf: "dark",
+    sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
+  };
+  try {
+    const s = JSON.parse(localStorage.getItem("chart251") || "{}");
+    if (PROGS[s.prog]) state.prog = s.prog;
+    ["minor", "short", "mix"].forEach(k => { if (typeof s[k] === "boolean") state[k] = s[k]; });
+    if (["hold","vi"].includes(s.turn)) state.turn = s.turn;
+    if (["random","cycle"].includes(s.order)) state.order = s.order;
+    if (s.start === -1 || (Number.isInteger(s.start) && s.start >= 0 && s.start < 12)) state.start = s.start;
+    ["domV","domVI"].forEach(k => { if (["plain","ext","b9","alt"].includes(s[k])) state[k] = s[k]; });
+    if ([1,2].includes(s.reps)) state.reps = s.reps;
+    if (typeof s.style === "string") state.style = s.style;
+    if (["dark","light"].includes(s.pdf)) state.pdf = s.pdf;
+    const ok = a => Array.isArray(a) && a.length && a.every(p => Number.isInteger(p) && p >= 0 && p < 12);
+    if (s.sel && ok(s.sel.major)) state.sel.major = s.sel.major;
+    if (s.sel && ok(s.sel.minor)) state.sel.minor = s.sel.minor;
+  } catch (e) {}
+  function save() {
+    try {
+      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel } = state;
+      localStorage.setItem("chart251", JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel }));
+    } catch (e) {}
+  }
+  const isMinor = () => state.minor && PROGS[state.prog].minor;     // backdoor and iii–VI–ii–V are major-key sounds
+  const Q = () => isMinor() ? "minor" : "major";
+  const sel = () => state.sel[Q()];
+  const barsPerKey = () => PROGS[state.prog].bars[state.short ? 1 : 0];
+
+  function keyFor(pc, minor) {
+    if (!minor && pc === 6) {
+      const s = state.sel.major;
+      return [7,2,9,4,11].filter(p => s.includes(p)).length > [5,10,3,8,1].filter(p => s.includes(p)).length ? [3,1] : [4,-1];
+    }
+    return (minor ? MIN : MAJ)[pc];
+  }
+  function spell(key, steps, semis) {
+    const li = (key[0] + steps) % 7;
+    const target = ((NAT[key[0]] + key[1] + semis) % 12 + 12) % 12;
+    let a = target - NAT[li]; if (a > 6) a -= 12; if (a < -6) a += 12;
+    return LETTERS[li] + ACC[a];
+  }
+  // iReal Pro roots are a letter with b or #; respell the rare E♯, B♯, C♭, F♭ and double accidentals
+  const ENH = { "E♯":"F", "B♯":"C", "C♭":"B", "F♭":"E" };
+  const PCNAME = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+  function ireal(r) {
+    if (ENH[r]) return ENH[r];
+    if (/𝄫|𝄪/.test(r)) { const pc = ((NAT[LETTERS.indexOf(r[0])] + (r.includes("𝄪") ? 2 : -2)) % 12 + 12) % 12; return PCNAME[pc]; }
+    return r.replace("♭", "b").replace("♯", "#");
+  }
+  const domQ = (d, minor) => d === "b9" ? "7b9" : d === "alt" ? "7alt" : d === "ext" && !minor ? "13" : "7";
+  const keyName = pc => ireal(spell(keyFor(pc, isMinor()), 0, 0)) + (isMinor() ? " minor" : " major");
+
+  // one key's bars as iReal chord tokens, e.g. [["D-7"], ["G13"], ["C^7"], ["x"]]
+  function barsFor(pc, idx) {
+    const minor = isMinor(), key = keyFor(pc, minor);
+    const pick = state.mix && mix[idx] ? mix[idx] : { v: state.domV, vi: state.domVI };
+    const r = (steps, semis) => ireal(spell(key, steps, semis));
+    const ii = r(1, 2) + (minor ? "h7" : "-7"), V = r(4, 7) + domQ(pick.v, minor);
+    const I = r(0, 0) + (minor ? "-6" : "^7");
+    const long = !state.short;
+    switch (state.prog) {
+      case "25":
+        return long ? [[ii], [V]] : [[ii, V]];
+      case "bd": {                                            // iv–♭VII7 → I (in C: F–7 B♭7 Cmaj7)
+        const iv = r(3, 5) + "-7", bVII = r(6, 10) + domQ(pick.v, false);
+        return long ? [[iv], [bVII], [I], ["x"]] : [[iv, bVII], [I]];
+      }
+      case "3625": {                                          // iii–VI7–ii–V7 (in C: E–7 A7 D–7 G7)
+        const iii = r(2, 4) + "-7", VI = r(5, 9) + domQ(pick.vi, false);
+        return long ? [[iii], [VI], [ii], [V]] : [[iii, VI], [ii, V]];
+      }
+      default:
+        if (!long) return [[ii, V], [I]];
+        return [[ii], [V], [I], [state.turn === "hold" ? "x" : r(5, 9) + domQ(pick.vi, minor)]];
+    }
+  }
+
+  /* ---------- the order of keys ---------- */
+  let order = [], mix = [];
+  const TYPES = ["plain", "ext", "b9", "alt"];
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function firstKey() { const s = sel(); return s.includes(state.start) ? state.start : s[Math.floor(Math.random() * s.length)]; }
+  // shuffle: every key at random. cycle: round the 4ths from the "Start on" key
+  function deal() {
+    const s = sel().slice();
+    if (state.order === "cycle") {
+      const start = firstKey();
+      order = s.sort((a, b) => ((FOURTHS(a) - FOURTHS(start) + 12) % 12) - ((FOURTHS(b) - FOURTHS(start) + 12) % 12));
+    } else order = shuffle(s);
+    rollMix();
+  }
+  // "Random mix": every dominant gets its own type, re-rolled with each shuffle
+  function rollMix() { mix = order.map(() => ({ v: TYPES[Math.floor(Math.random() * 4)], vi: TYPES[Math.floor(Math.random() * 4)] })); }
+
+  /* ---------- the chart as lines of 4 bars ---------- */
+  // every key's bars in order, flagged with where each key starts and ends; 4 bars to a line, like iReal Pro
+  function chartBars() {
+    const out = [];
+    order.forEach((pc, k) => {
+      barsFor(pc, k).forEach((chords, j, all) => out.push({ chords, label: j === 0 ? keyName(pc) : "", segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
+    });
+    return out;
+  }
+  function chartLines() {
+    const bars = chartBars(), lines = [];
+    for (let i = 0; i < bars.length; i += 4) lines.push(bars.slice(i, i + 4));
+    return lines;
+  }
+
+  /* ---------- iReal Pro text ---------- */
+  // Each bar is padded to 4 cells so a line holds exactly 4 bars in iReal Pro.
+  function cell(chords) { return chords.length === 1 ? chords[0] + "   " : chords[0] + " " + chords[1] + " "; }
+  function music() {
+    const open = state.reps === 2 ? "{" : "[", close = state.reps === 2 ? "}" : "]";
+    return order.map((pc, k) => {
+      const body = barsFor(pc, k).map((b, i) => (i === 0 ? "<" + keyName(pc) + ">" : "") + cell(b)).join("|");
+      const last = k === order.length - 1;
+      return open + (k === 0 ? "T44" : "") + body + (last && state.reps === 1 ? "Z" : close);
+    }).join("");
+  }
+  function defaultTitle() {
+    const p = PROGS[state.prog];
+    return p.name + (p.minor ? (state.minor ? " Minor" : " Major") : "") + " " + (state.short ? "Short" : "Long") + " (" + (state.order === "cycle" ? "Cycle" : "Shuffled") + ")";
+  }
+  function chartTitle() { return ($("title").value.trim() || defaultTitle()).replace(/=/g, "-"); }
+  function url() {
+    const k = ireal(spell(keyFor(order[0], isMinor()), 0, 0)) + (isMinor() ? "-" : "");
+    // iReal Pro shows the composer as "First Last" from "Last First", so this reads "Flip 251" in the app
+    const fields = [chartTitle(), "251 Flip", state.style, k, "n", music()];
+    return "irealbook://" + fields.map(encodeURIComponent).join("=");
+  }
+
+  /* ---------- preview ---------- */
+  function pretty(tok) {
+    if (tok === "x") return '<span class="ch sim">%</span>';
+    const m = tok.match(/^([A-G])([b#]?)(.*)$/);
+    const acc = m[2] === "b" ? "<s>♭</s>" : m[2] === "#" ? "<s>♯</s>" : "";
+    const q = m[3].replace("^7", "Δ7").replace("h7", "ø7").replace(/-/g, "–").replace("b9", "<s>♭</s>9");
+    return '<span class="ch">' + m[1] + acc + (q ? "<i>" + q + "</i>" : "") + "</span>";
+  }
+  const labelHTML = t => t.replace(/([A-G])b /, "$1<s>♭</s> ").replace(/([A-G])# /, "$1<s>♯</s> ");
+  // describe the chart for screen readers, since the chart itself is a picture
+  function altText() {
+    return chartTitle() + ". " + order.map((pc, k) => keyName(pc) + ": " + barsFor(pc, k).map(b => b.join(" ")).join(", ").replace(/\bx\b/g, "repeat")).join(". ");
+  }
+  let imgW = 0;
+  function drawPreview() {
+    const img = $("sheetImg"), w = Math.round(img.parentElement.clientWidth - 24) || 340;
+    imgW = w;
+    img.src = chartImage(w);
+    img.alt = altText();
+  }
+  function render() {
+    drawPreview();
+    const u = url();
+    $("open").href = u; $("link").value = u;
+    $("title").placeholder = defaultTitle();
+    sync();
+  }
+
+  /* ---------- controls ---------- */
+  const $ = id => document.getElementById(id);
+  const press = (id, on) => $(id).setAttribute("aria-pressed", String(on));
+  function renderChips() {
+    const chips = $("chips"); chips.innerHTML = "";
+    BY_FOURTHS.forEach(pc => {
+      const b = document.createElement("button"); b.className = "chip";
+      const r = spell(keyFor(pc, isMinor()), 0, 0);
+      b.innerHTML = r[0] + (r.slice(1) ? "<s>" + r.slice(1) + "</s>" : "") + (isMinor() ? '<small style="font-size:.6em">m</small>' : "");
+      b.setAttribute("aria-pressed", String(sel().includes(pc)));
+      b.onclick = () => { const s = sel(), i = s.indexOf(pc); if (i >= 0) { if (s.length === 1) return; s.splice(i, 1); } else s.push(pc); changed(true); };
+      chips.appendChild(b);
+    });
+    const now = sel().slice().sort((a, b) => a - b).join();
+    ["all","flat","sharp","start"].forEach(p => press("p-" + p, PRESETS[Q()][p].slice().sort((a, b) => a - b).join() === now));
+    $("keysCap").textContent = "Keys · " + sel().length + " of 12";
+    const st = $("start"), s2 = sel(), list = BY_FOURTHS.filter(p => s2.includes(p));
+    st.innerHTML = '<option value="-1">Any key</option>' + list.map(p => {
+      const r = spell(keyFor(p, isMinor()), 0, 0);
+      return '<option value="' + p + '">' + r + (isMinor() ? " minor" : " major") + "</option>";
+    }).join("");
+    st.value = String(s2.includes(state.start) ? state.start : -1);
+  }
+  function sync() {
+    const P = PROGS[state.prog], n = P.bars;
+    ["251","25","bd","3625"].forEach(g => press("g-" + g, state.prog === g));
+    press("q-major", !state.minor || !P.minor); press("q-minor", state.minor && P.minor);
+    $("qCtl").classList.toggle("off", !P.minor);
+    $("qCap").textContent = P.minor ? "Quality" : "Quality (major only)";
+    press("l-long", !state.short); press("l-short", state.short);
+    $("l-long").textContent = "Long · " + n[0];
+    $("l-short").textContent = "Short · " + n[1];
+    press("t-hold", state.turn === "hold"); press("t-vi", state.turn === "vi");
+    $("turnCtl").classList.toggle("off", !(state.prog === "251" && !state.short));
+    press("o-random", state.order === "random"); press("o-cycle", state.order === "cycle");
+    // "Start on" only matters when cycling; it stays in place but greys out for Shuffle
+    $("startCtl").classList.toggle("off", state.order !== "cycle");
+    $("start").disabled = state.order !== "cycle";
+    ["plain","ext","b9","alt"].forEach(d => { press("dv-" + d, state.domV === d); press("dvi-" + d, state.domVI === d); });
+    press("m-set", !state.mix); press("m-mix", state.mix);
+    $("vCap").textContent = state.prog === "bd" ? "♭VII7 sound" : "V7 sound";
+    $("vCtl").classList.toggle("off", state.mix);
+    const usesVI = state.prog === "3625" || (state.prog === "251" && !state.short && state.turn === "vi");
+    $("viCtl").classList.toggle("off", state.mix || !usesVI);
+    press("r-1", state.reps === 1); press("r-2", state.reps === 2);
+    $("style").value = state.style;
+    press("pdf-dark", state.pdf === "dark"); press("pdf-light", state.pdf === "light");
+    document.querySelector(".window").classList.toggle("light", state.pdf === "light");
+  }
+  function changed(reDeal) { save(); renderChips(); if (reDeal) deal(); render(); }
+
+  ["251","25","bd","3625"].forEach(g => $("g-" + g).onclick = () => { const was = Q(); state.prog = g; changed(Q() !== was); });
+  $("q-major").onclick = () => { state.minor = false; changed(true); };
+  $("q-minor").onclick = () => { state.minor = true; changed(true); };
+  $("l-long").onclick = () => { state.short = false; changed(false); };
+  $("l-short").onclick = () => { state.short = true; changed(false); };
+  $("t-hold").onclick = () => { state.turn = "hold"; changed(false); };
+  $("t-vi").onclick = () => { state.turn = "vi"; changed(false); };
+  $("o-random").onclick = () => { state.order = "random"; changed(true); };
+  $("o-cycle").onclick = () => { state.order = "cycle"; changed(true); };
+  ["plain","ext","b9","alt"].forEach(d => {
+    $("dv-" + d).onclick = () => { state.domV = d; changed(false); };
+    $("dvi-" + d).onclick = () => { state.domVI = d; changed(false); };
+  });
+  $("m-set").onclick = () => { state.mix = false; changed(false); };
+  $("m-mix").onclick = () => { state.mix = true; rollMix(); changed(false); };
+  $("r-1").onclick = () => { state.reps = 1; changed(false); };
+  $("r-2").onclick = () => { state.reps = 2; changed(false); };
+  $("pdf-dark").onclick = () => { state.pdf = "dark"; save(); render(); };
+  $("pdf-light").onclick = () => { state.pdf = "light"; save(); render(); };
+  $("style").onchange = e => { state.style = e.target.value; changed(false); };
+  $("start").onchange = e => { state.start = Number(e.target.value); changed(true); };
+  ["all","flat","sharp","start"].forEach(p => $("p-" + p).onclick = () => { state.sel[Q()] = PRESETS[Q()][p].slice(); changed(true); });
+  $("title").oninput = () => render();
+  // Shuffle again re-deals everything; while cycling it also picks a new starting key
+  $("reshuffle").onclick = () => {
+    if (state.order === "cycle") {
+      const s = sel().filter(p => p !== order[0]), pool = s.length ? s : sel();
+      state.start = pool[Math.floor(Math.random() * pool.length)]; save(); renderChips();
+    }
+    deal(); render(); status(state.order === "cycle" ? "New starting key." : "Shuffled. New key order.");
+  };
+
+  const statusEl = $("status");
+  let st = 0;
+  function status(msg) { statusEl.textContent = msg; clearTimeout(st); st = setTimeout(() => statusEl.textContent = "", 3500); }
+
+  $("copy").onclick = () => {
+    const u = url(), ta = $("link");
+    const fallback = () => { ta.closest("details").open = true; ta.focus(); ta.select(); status("Link selected. Copy it from the box below."); };
+    try { navigator.clipboard.writeText(u).then(() => status("Copied. Paste it into your browser's address bar to open in iReal Pro."), fallback); }
+    catch (e) { fallback(); }
+  };
+
+  /* ---------- PDF lead sheet ----------
+     Drawn on a canvas with the page's own fonts (so ♭, ♯, Δ and ø look right), then placed on a US Letter page.
+     Same colours as the chart window; key names sit under each key's first bar, like iReal Pro. */
+  const LOOKS = {
+    dark:  { bg: "#1d1b19", ink: "#f1ead8", dim: "#b8ae98", rule: "#b8ae98", amber: "#e2a23b", link: [226, 162, 59] },
+    // light: black on white like a printed lead sheet, with a deep red for the key names
+    light: { bg: "#ffffff", ink: "#141414", dim: "#141414", rule: "#141414", amber: "#a8261b", link: [168, 38, 27] }
+  };
+  let PDF = LOOKS.dark;
+  const FLAP = '"Barlow Condensed", "Arial Narrow", Arial, sans-serif', MUSIC = '"Noto Music", "Apple Symbols", "Segoe UI Symbol", serif', MONO = '"IBM Plex Mono", Menlo, monospace';
+  async function fontsReady() {
+    try {
+      await Promise.all(["600 40px \"Barlow Condensed\"", "700 40px \"Barlow Condensed\"", "40px \"Noto Music\"", "600 20px \"IBM Plex Mono\""].map(f => document.fonts.load(f, "C♭♯Δø")));
+    } catch (e) {}
+  }
+  /* Accidentals are drawn as shapes rather than font glyphs, so they come out the same size and weight in the
+     preview, the saved image and the PDF, whatever fonts the device has. Proportions follow engraved music:
+     a thin stem, a bowl that's heavy on the right and open inside; a sharp with thin uprights and thick,
+     slightly rising bars. h is the symbol's height; returns its width. */
+  function flatShape(c, x, top, h, dry) {
+    const stem = Math.max(.6, h * .1), bw = h * .44, sx = x + stem;
+    if (!dry) {
+      c.fillRect(x, top, stem, h);
+      c.beginPath();
+      // outer edge of the bowl
+      c.moveTo(sx, top + h * .54);
+      c.bezierCurveTo(sx + bw * .45, top + h * .36, sx + bw * 1.06, top + h * .42, sx + bw * .96, top + h * .63);
+      c.bezierCurveTo(sx + bw * .88, top + h * .80, sx + bw * .40, top + h * .93, sx, top + h);
+      c.closePath();
+      // inner edge (the open counter), cut out with even-odd fill
+      c.moveTo(sx, top + h * .67);
+      c.bezierCurveTo(sx + bw * .30, top + h * .54, sx + bw * .66, top + h * .55, sx + bw * .60, top + h * .69);
+      c.bezierCurveTo(sx + bw * .54, top + h * .80, sx + bw * .26, top + h * .88, sx, top + h * .92);
+      c.closePath();
+      c.fill("evenodd");
+    }
+    return stem + bw;
+  }
+  function sharpShape(c, x, top, h, dry) {
+    const w = h * .56, up = Math.max(.6, h * .085), bar = h * .145, rise = h * .1;
+    if (!dry) {
+      c.fillRect(x + w * .30, top + h * .06, up, h * .94);          // left upright sits a touch lower
+      c.fillRect(x + w * .70 - up, top, up, h * .94);
+      [.36, .66].forEach(f => {                                     // the two bars, rising to the right
+        const y = top + h * f;
+        c.beginPath();
+        c.moveTo(x, y + rise / 2); c.lineTo(x + w, y - rise / 2);
+        c.lineTo(x + w, y - rise / 2 + bar); c.lineTo(x, y + rise / 2 + bar);
+        c.closePath(); c.fill();
+      });
+    }
+    return w;
+  }
+  const accShape = (c, kind, x, top, h, dry) => kind === "b" ? flatShape(c, x, top, h, dry) : sharpShape(c, x, top, h, dry);
+  const capOf = (c, size) => { const m = c.measureText("H"); return (m.actualBoundingBoxAscent > 0 ? m.actualBoundingBoxAscent : size * .7); };
+
+  // draw one chord symbol with its baseline at (x, y); returns its width
+  function drawChord(c, tok, x, y, S, dry) {
+    const put = (t, px, py) => { if (!dry) c.fillText(t, px, py); };
+    if (tok === "x") { c.fillStyle = PDF.dim; c.font = "500 " + S + "px " + FLAP; put("%", x + S * .15, y); return S; }
+    const m = tok.match(/^([A-G])([b#]?)(.*)$/);
+    const q = m[3].replace("^7", "Δ7").replace("h7", "ø7").replace(/-/g, "–");
+    let cx = x;
+    c.fillStyle = PDF.ink;
+    c.font = "600 " + S + "px " + FLAP; put(m[1], cx, y); cx += c.measureText(m[1]).width;
+    const cap = capOf(c, S);
+    if (m[2]) {
+      // raised accidental: its top lines up with the top of the letter, about two-thirds of the letter's height
+      const h = cap * (m[2] === "b" ? .78 : .9), top = y - cap * (m[2] === "b" ? 1.03 : 1.1);
+      cx += S * .03;
+      cx += accShape(c, m[2], cx, top, h, dry) + S * .04;
+    }
+    // quality as a superscript
+    const qs = S * .58, qy = y - S * .36;
+    c.font = "600 " + qs + "px " + FLAP;
+    const qcap = capOf(c, qs);
+    q.split(/(b9)/).forEach(part => {
+      if (!part) return;
+      c.font = "600 " + qs + "px " + FLAP;
+      if (part === "b9") {
+        cx += qs * .02;
+        cx += flatShape(c, cx, qy - qcap * 1.02, qcap * .98, dry) + qs * .05;
+        put("9", cx, qy); cx += c.measureText("9").width;
+      } else { put(part, cx, qy); cx += c.measureText(part).width; }
+    });
+    return cx - x;
+  }
+  function drawLabel(c, text, x, y, size) {
+    c.fillStyle = PDF.amber; c.font = "600 " + size + "px " + MONO;
+    const m = text.match(/^([A-G])([b#]?)( .*)$/);
+    if (!m) { c.fillText(text, x, y); return; }
+    let cx = x; c.fillText(m[1], cx, y); cx += c.measureText(m[1]).width;
+    if (m[2]) {
+      const cap = capOf(c, size);
+      cx += size * .06;
+      cx += accShape(c, m[2], cx, y - cap * 1.05, cap * 1.0, false) + size * .02;
+    }
+    c.fillText(m[3], cx, y);
+  }
+  function drawBarline(c, x, y0, y1, kind, s) {
+    c.fillStyle = PDF.rule;
+    if (kind === "single") { c.fillRect(x - s * .6, y0, s * 1.2, y1 - y0); return; }
+    c.fillStyle = PDF.dim;
+    if (kind === "double") { c.fillRect(x - s * 2.2, y0, s * 1.1, y1 - y0); c.fillRect(x + s * 1.1, y0, s * 1.1, y1 - y0); return; }
+    if (kind === "final") { c.fillRect(x - s * 4.6, y0, s * 1.1, y1 - y0); c.fillRect(x - s * 2.4, y0, s * 2.4, y1 - y0); return; }
+    const mid = (y0 + y1) / 2;
+    const dots = cx => [-1, 1].forEach(k => { c.beginPath(); c.arc(cx, mid + k * s * 5, s * 1.5, 0, Math.PI * 2); c.fill(); });
+    if (kind === "repBoth") {               // :||: — the end of one key's repeat and the start of the next
+      c.fillRect(x - s * 1.2, y0, s * 2.4, y1 - y0);
+      c.fillRect(x - s * 4.6, y0, s * 1.1, y1 - y0); c.fillRect(x + s * 3.5, y0, s * 1.1, y1 - y0);
+      dots(x - s * 8); dots(x + s * 8); return;
+    }
+    // repeat signs: thick line, thin line and two dots on the inside
+    const dir = kind === "repOpen" ? 1 : -1;
+    c.fillRect(dir > 0 ? x : x - s * 2.4, y0, s * 2.4, y1 - y0);
+    c.fillRect(x + dir * s * 3.6 - (dir > 0 ? 0 : s * 1.1), y0, s * 1.1, y1 - y0);
+    [-1, 1].forEach(k => { c.beginPath(); c.arc(x + dir * s * 7, mid + k * s * 5, s * 1.5, 0, Math.PI * 2); c.fill(); });
+  }
+  // the rows of bars, shared by the PDF page and the on-screen chart image
+  function drawLines(c, lines, x0, top, barW, lineH, S, labelSize, lastIdx, firstIdx) {
+    const s = Math.max(.6, S / 34);
+    lines.forEach((line, i) => {
+      const y0 = top + i * lineH, yBase = y0 + S * 1.05, yBar0 = y0 + 2, yBar1 = y0 + S * 1.3;
+      const globalLast = firstIdx + i === lastIdx;
+      line.forEach((b, j) => {
+        const x = x0 + j * barW;
+        drawBarline(c, x, yBar0, yBar1, b.segStart ? (state.reps === 2 ? (j > 0 ? "repBoth" : "repOpen") : "double") : "single", s);
+        const n = b.chords.length;
+        // each chord gets an equal share of the bar; a long symbol shrinks to fit its share so nothing touches a barline
+        const pad = (b.segStart && state.reps === 2 ? 15 : 8) * s / .9, slot = (barW - pad - 12 * s) / n;
+        b.chords.forEach((tok, k) => {
+          const w = drawChord(c, tok, 0, 0, S, true), size = w > slot - 6 * s ? S * (slot - 6 * s) / w : S;
+          drawChord(c, tok, x + pad + k * (barW - pad) / n, yBase, size);
+        });
+        if (b.label) drawLabel(c, b.label, x + 8 * s / .9, yBar1 + labelSize * 1.15, labelSize);
+      });
+      const xEnd = x0 + line.length * barW, lastBar = line[line.length - 1];
+      drawBarline(c, xEnd, yBar0, yBar1, globalLast && state.reps === 1 ? "final" : state.reps === 2 && lastBar.segEnd ? "repClose" : lastBar.segEnd ? "double" : "single", s);
+    });
+  }
+  // a whole PDF page; scale = canvas pixels per PDF point
+  function drawPage(lines, pageIdx, pages, perPage, scale) {
+    const W = 612, H = 792, M = 40;
+    const cv = document.createElement("canvas");
+    cv.width = W * scale; cv.height = H * scale;
+    const c = cv.getContext("2d");
+    c.scale(scale, scale);
+    c.fillStyle = PDF.bg; c.fillRect(0, 0, W, H);
+    c.textBaseline = "alphabetic";
+    c.textAlign = "center"; c.fillStyle = PDF.ink; c.font = "700 26px " + FLAP;
+    c.fillText(chartTitle(), W / 2, M + 22);
+    c.textAlign = "left"; c.fillStyle = PDF.dim; c.font = "500 12px " + MONO;
+    c.fillText("(" + state.style + ")", M, M + 42);
+    c.textAlign = "right"; c.fillText("Flip 251" + (pages > 1 ? "  ·  " + (pageIdx + 1) + "/" + pages : ""), W - M, M + 42);
+    c.textAlign = "left";
+    const top = M + 62, avail = H - top - M - 24;
+    const used = Math.min(perPage, lines.length - pageIdx * perPage);
+    // close to a printed lead sheet: about 66 pt a line (iReal Pro-like), never more
+    const lineH = Math.min(66, avail / used), S = Math.min(31, lineH * .47);
+    const startLine = pageIdx * perPage;
+    drawLines(c, lines.slice(startLine, startLine + perPage), M, top, (W - 2 * M) / 4, lineH, S, 10.5, lines.length - 1, startLine);
+    c.fillStyle = PDF.dim; c.font = "500 9px " + MONO;
+    c.fillText(order.length + " keys · " + (state.order === "cycle" ? "cycle of 4ths" : "shuffled") + (state.reps === 2 ? " · each key twice" : ""), M, H - M + 8);
+    return cv;
+  }
+  // the on-screen chart: a real image (so press-and-hold saves it), drawn exactly like the PDF at the window's width
+  function chartImage(cssW) {
+    PDF = LOOKS[state.pdf] || LOOKS.dark;
+    const lines = chartLines(), M = 6, barW = (cssW - 2 * M) / 4;
+    const S = Math.max(14, Math.min(28, barW * .2)), lineH = S * 2.3, top = 58;
+    const H = Math.ceil(top + lines.length * lineH + 4);
+    const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 2));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(cssW * scale); cv.height = Math.round(H * scale);
+    const c = cv.getContext("2d");
+    c.scale(scale, scale);
+    c.fillStyle = PDF.bg; c.fillRect(0, 0, cssW, H);
+    c.textBaseline = "alphabetic"; c.textAlign = "left";
+    c.fillStyle = PDF.ink; c.font = "600 21px " + FLAP;
+    let title = chartTitle();
+    while (c.measureText(title).width > cssW - 2 * M && title.length > 4) title = title.slice(0, -2) + "…";
+    c.fillText(title, M, 24);
+    c.fillStyle = PDF.dim; c.font = "600 9.5px " + MONO;
+    const bars = order.length * barsPerKey() * state.reps;
+    c.fillText((order.length + " keys · " + bars + " bars · " + state.style).toUpperCase(), M, 42);
+    drawLines(c, lines, M, top, barW, lineH, S, Math.max(9, S * .42), lines.length - 1, 0);
+    return cv.toDataURL("image/png");
+  }
+  async function makePDF() {
+    if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("pdf library not loaded");
+    await fontsReady();
+    PDF = LOOKS[state.pdf] || LOOKS.dark;
+    const lines = chartLines(), perPage = 12, pages = Math.max(1, Math.ceil(lines.length / perPage));
+    const doc = new window.jspdf.jsPDF({ unit: "pt", format: "letter", compress: true });
+    doc.setProperties({ title: chartTitle(), subject: "ii-V-I practice chart", creator: "Flip 251" });
+    for (let p = 0; p < pages; p++) {
+      if (p) doc.addPage();
+      const cv = drawPage(lines, p, pages, perPage, 3);
+      doc.addImage(cv.toDataURL("image/jpeg", .9), "JPEG", 0, 0, 612, 792, undefined, "FAST");
+    }
+    // a tappable "Open in iReal Pro" line at the bottom right of the last page
+    doc.setPage(pages);
+    doc.setTextColor(PDF.link[0], PDF.link[1], PDF.link[2]); doc.setFontSize(9);
+    doc.textWithLink("Open in iReal Pro", 612 - 40 - doc.getTextWidth("Open in iReal Pro"), 792 - 32, { url: url() });
+    return doc.output("blob");
+  }
+
+  // in the app viewer the page asks for a save; on any ordinary website it's a normal file download
+  let downloads = null;
+  if (window.claude && window.claude.use) window.claude.use("downloads").then(d => { downloads = d; }).catch(() => {});
+  function plainDownload(name, blob) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+  }
+  $("dl").onclick = async () => {
+    const btn = $("dl"), name = (chartTitle().replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, " ") || "ii-V-I chart") + ".pdf";
+    btn.disabled = true; status("Making the PDF…");
+    try {
+      const blob = await makePDF();
+      if (downloads) {
+        try { await downloads.save({ filename: name, data: blob }); status("Saved."); }
+        catch (e) {
+          if (e && e.code === "declined") status("");
+          else if (e && e.code === "rate_limited") status("A save is already open. Try again in a moment.");
+          else status("Couldn't save the PDF here.");
+        }
+      } else {
+        // phones and tablets: the share sheet (Save to Files, AirDrop, Print…); elsewhere a normal download
+        const file = typeof File === "function" ? new File([blob], name, { type: "application/pdf" }) : null;
+        const touch = window.matchMedia && matchMedia("(hover: none)").matches;
+        if (touch && file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: chartTitle() }); status(""); }
+          catch (e) { if (!e || e.name !== "AbortError") { plainDownload(name, blob); status("Downloaded."); } }
+        } else { plainDownload(name, blob); status("Downloaded."); }
+      }
+    } catch (e) { status("Couldn't make the PDF. Check your connection and try again."); }
+    btn.disabled = false;
+  };
+
+  renderChips();
+  deal();
+  render();
+  // redraw once the fonts arrive, and when the window changes width
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fontsReady()).then(drawPreview);
+  let rz = 0;
+  window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (Math.abs($("sheetImg").parentElement.clientWidth - 24 - imgW) > 4) drawPreview(); }, 150); });
+})();
+</script>
