@@ -35,6 +35,7 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
 - The preview is a canvas-drawn **image** (press-and-hold to save), drawn by the same code as the PDF.
 - Flats and sharps are drawn as vector shapes (thin stem, open bowl; thin uprights, thick rising bars) sized from the
   letter's cap height — not font glyphs — so they look the same everywhere.
+  The half-diminished ø is drawn the same way: an open ring with a thin slash (iReal-like), never the font's heavy ø.
 - The app's name is **251 Charts** (home screen, top-right plate, PDF header). iReal composer field is `Charts 251` so
   iReal displays "251 Charts". Legacy `irealbook://` links (no tempo field). 4/4 only (a 3/4 option was tried and dropped).
 

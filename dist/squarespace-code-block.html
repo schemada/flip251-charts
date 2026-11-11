@@ -635,6 +635,23 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     }
     return w;
   }
+  // half-diminished: an open ring with a thin slash through it (like iReal Pro), not the font&#x27;s heavy &amp;#248;
+  function halfDimShape(c, x, base, cap, dry) {
+    const d = cap * .8, ring = Math.max(.8, cap * .135), pad = cap * .07;
+    const cx = x + pad + d / 2, cy = base - d / 2 - ring / 2;
+    if (!dry) {
+      c.save();
+      c.strokeStyle = c.fillStyle; c.lineCap = &quot;round&quot;;
+      c.lineWidth = ring;
+      c.beginPath(); c.arc(cx, cy, d / 2, 0, Math.PI * 2); c.stroke();
+      c.lineWidth = Math.max(.6, cap * .08);
+      c.beginPath();
+      c.moveTo(cx - d * .62, cy + d * .62); c.lineTo(cx + d * .62, cy - d * .62);
+      c.stroke();
+      c.restore();
+    }
+    return d + pad * 2 + ring;
+  }
   const accShape = (c, kind, x, top, h, dry) =&gt; kind === &quot;b&quot; ? flatShape(c, x, top, h, dry) : sharpShape(c, x, top, h, dry);
   const capOf = (c, size) =&gt; { const m = c.measureText(&quot;H&quot;); return (m.actualBoundingBoxAscent &gt; 0 ? m.actualBoundingBoxAscent : size * .7); };
 
@@ -658,9 +675,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     const qs = S * .58, qy = y - S * .36;
     c.font = &quot;600 &quot; + qs + &quot;px &quot; + FLAP;
     const qcap = capOf(c, qs);
-    q.split(/(b9)/).forEach(part =&gt; {
+    q.split(/(b9|&amp;#248;)/).forEach(part =&gt; {
       if (!part) return;
       c.font = &quot;600 &quot; + qs + &quot;px &quot; + FLAP;
+      if (part === &quot;&amp;#248;&quot;) { cx += halfDimShape(c, cx, qy, qcap, dry) + qs * .02; return; }
       if (part === &quot;b9&quot;) {
         cx += qs * .02;
         cx += flatShape(c, cx, qy - qcap * 1.02, qcap * .98, dry) + qs * .05;

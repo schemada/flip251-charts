@@ -674,6 +674,23 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     }
     return w;
   }
+  // half-diminished: an open ring with a thin slash through it (like iReal Pro), not the font's heavy ø
+  function halfDimShape(c, x, base, cap, dry) {
+    const d = cap * .8, ring = Math.max(.8, cap * .135), pad = cap * .07;
+    const cx = x + pad + d / 2, cy = base - d / 2 - ring / 2;
+    if (!dry) {
+      c.save();
+      c.strokeStyle = c.fillStyle; c.lineCap = "round";
+      c.lineWidth = ring;
+      c.beginPath(); c.arc(cx, cy, d / 2, 0, Math.PI * 2); c.stroke();
+      c.lineWidth = Math.max(.6, cap * .08);
+      c.beginPath();
+      c.moveTo(cx - d * .62, cy + d * .62); c.lineTo(cx + d * .62, cy - d * .62);
+      c.stroke();
+      c.restore();
+    }
+    return d + pad * 2 + ring;
+  }
   const accShape = (c, kind, x, top, h, dry) => kind === "b" ? flatShape(c, x, top, h, dry) : sharpShape(c, x, top, h, dry);
   const capOf = (c, size) => { const m = c.measureText("H"); return (m.actualBoundingBoxAscent > 0 ? m.actualBoundingBoxAscent : size * .7); };
 
@@ -697,9 +714,10 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     const qs = S * .58, qy = y - S * .36;
     c.font = "600 " + qs + "px " + FLAP;
     const qcap = capOf(c, qs);
-    q.split(/(b9)/).forEach(part => {
+    q.split(/(b9|ø)/).forEach(part => {
       if (!part) return;
       c.font = "600 " + qs + "px " + FLAP;
+      if (part === "ø") { cx += halfDimShape(c, cx, qy, qcap, dry) + qs * .02; return; }
       if (part === "b9") {
         cx += qs * .02;
         cx += flatShape(c, cx, qy - qcap * 1.02, qcap * .98, dry) + qs * .05;
