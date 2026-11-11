@@ -852,7 +852,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   function storeRecipes(list) { try { localStorage.setItem(RKEY, JSON.stringify(list)); return true; } catch (e) { return false; } }
   function renderRecipes(selected) {
     const list = loadRecipes(), r = $(&quot;recipes&quot;);
-    r.innerHTML = &#x27;&lt;option value=&quot;&quot;&gt;&#x27; + (list.length ? &quot;Saved recipes (&quot; + list.length + &quot;)&quot; : &quot;No saved recipes yet&quot;) + &quot;&lt;/option&gt;&quot; +
+    // the first line is only a label: disabled and hidden so it isn&#x27;t offered as a choice in the picker
+    r.innerHTML = &#x27;&lt;option value=&quot;&quot; disabled hidden&gt;&#x27; + (list.length ? &quot;Saved recipes (&quot; + list.length + &quot;)&quot; : &quot;No saved recipes yet&quot;) + &quot;&lt;/option&gt;&quot; +
       list.map((x, i) =&gt; &#x27;&lt;option value=&quot;&#x27; + i + &#x27;&quot;&gt;&lt;/option&gt;&#x27;).join(&quot;&quot;);
     list.forEach((x, i) =&gt; r.options[i + 1].textContent = x.name);
     r.value = selected != null &amp;&amp; selected &gt;= 0 ? String(selected) : &quot;&quot;;
