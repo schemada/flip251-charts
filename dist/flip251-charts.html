@@ -246,11 +246,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         </select>
         <select class="field" id="chordQ" aria-label="Chord quality" hidden>
           <option value="^7">maj7 (Δ7)</option>
-          <option value="-7">m7 (–7)</option>
-          <option value="h7">m7♭5 (ø7)</option>
+          <option value="-7">min7 (–7)</option>
+          <option value="h7">min7♭5 (ø7)</option>
           <option value="o7">dim7 (°7)</option>
-          <option value="-6">m6 (–6)</option>
-          <option value="-^7">m(maj7) (–Δ7)</option>
+          <option value="-6">min6 (–6)</option>
+          <option value="-^7">min(maj7) (–Δ7)</option>
           <option value="7sus">7sus4</option>
           <option value="^7#11">maj7♯11</option>
         </select>
@@ -519,7 +519,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     "maj9": "^9", "M9": "^9", "Δ9": "^9", "^9": "^9", "maj7#11": "^7#11", "Δ7#11": "^7#11", "^7#11": "^7#11",
     "6": "6", "69": "69", "6/9": "69",
     "m7": "-7", "min7": "-7", "mi7": "-7", "-7": "-7", "m": "-", "min": "-", "-": "-",
-    "m6": "-6", "-6": "-6", "m9": "-9", "-9": "-9", "m11": "-11", "-11": "-11",
+    "m6": "-6", "min6": "-6", "-6": "-6", "min9": "-9", "min11": "-11", "minmaj7": "-^7", "min(maj7)": "-^7", "m(maj7)": "-^7", "m9": "-9", "-9": "-9", "m11": "-11", "-11": "-11",
     "mmaj7": "-^7", "mM7": "-^7", "m^7": "-^7", "-^7": "-^7", "mΔ7": "-^7", "-Δ7": "-^7", "mΔ": "-^7", "-Δ": "-^7",
     "ø": "h7", "ø7": "h7", "h": "h7", "h7": "h7", "m7b5": "h7", "-7b5": "h7", "min7b5": "h7",
     "°": "o7", "°7": "o7", "o": "o7", "o7": "o7", "dim": "o7", "dim7": "o7",
@@ -753,7 +753,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     BY_FOURTHS.forEach(pc => {
       const b = document.createElement("button"); b.className = "chip";
       const r = spell(keyFor(pc, isMinor()), 0, 0);
-      b.innerHTML = r[0] + (r.slice(1) ? "<s>" + r.slice(1) + "</s>" : "") + (isMinor() ? '<small style="font-size:.6em">m</small>' : "");
+      b.innerHTML = r[0] + (r.slice(1) ? "<s>" + r.slice(1) + "</s>" : "") + (isMinor() ? '<small style="font-size:.5em;letter-spacing:0">min</small>' : "");
       b.setAttribute("aria-pressed", String(sel().includes(pc)));
       b.onclick = () => { const s = sel(), i = s.indexOf(pc); if (i >= 0) { if (s.length === 1) return; s.splice(i, 1); } else s.push(pc); changed(true); };
       chips.appendChild(b);

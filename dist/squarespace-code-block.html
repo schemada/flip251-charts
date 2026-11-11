@@ -228,11 +228,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         &lt;/select&gt;
         &lt;select class=&quot;field&quot; id=&quot;chordQ&quot; aria-label=&quot;Chord quality&quot; hidden&gt;
           &lt;option value=&quot;^7&quot;&gt;maj7 (&amp;#916;7)&lt;/option&gt;
-          &lt;option value=&quot;-7&quot;&gt;m7 (&amp;#8211;7)&lt;/option&gt;
-          &lt;option value=&quot;h7&quot;&gt;m7&amp;#9837;5 (&amp;#248;7)&lt;/option&gt;
+          &lt;option value=&quot;-7&quot;&gt;min7 (&amp;#8211;7)&lt;/option&gt;
+          &lt;option value=&quot;h7&quot;&gt;min7&amp;#9837;5 (&amp;#248;7)&lt;/option&gt;
           &lt;option value=&quot;o7&quot;&gt;dim7 (&amp;#176;7)&lt;/option&gt;
-          &lt;option value=&quot;-6&quot;&gt;m6 (&amp;#8211;6)&lt;/option&gt;
-          &lt;option value=&quot;-^7&quot;&gt;m(maj7) (&amp;#8211;&amp;#916;7)&lt;/option&gt;
+          &lt;option value=&quot;-6&quot;&gt;min6 (&amp;#8211;6)&lt;/option&gt;
+          &lt;option value=&quot;-^7&quot;&gt;min(maj7) (&amp;#8211;&amp;#916;7)&lt;/option&gt;
           &lt;option value=&quot;7sus&quot;&gt;7sus4&lt;/option&gt;
           &lt;option value=&quot;^7#11&quot;&gt;maj7&amp;#9839;11&lt;/option&gt;
         &lt;/select&gt;
@@ -501,7 +501,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &quot;maj9&quot;: &quot;^9&quot;, &quot;M9&quot;: &quot;^9&quot;, &quot;&amp;#916;9&quot;: &quot;^9&quot;, &quot;^9&quot;: &quot;^9&quot;, &quot;maj7#11&quot;: &quot;^7#11&quot;, &quot;&amp;#916;7#11&quot;: &quot;^7#11&quot;, &quot;^7#11&quot;: &quot;^7#11&quot;,
     &quot;6&quot;: &quot;6&quot;, &quot;69&quot;: &quot;69&quot;, &quot;6/9&quot;: &quot;69&quot;,
     &quot;m7&quot;: &quot;-7&quot;, &quot;min7&quot;: &quot;-7&quot;, &quot;mi7&quot;: &quot;-7&quot;, &quot;-7&quot;: &quot;-7&quot;, &quot;m&quot;: &quot;-&quot;, &quot;min&quot;: &quot;-&quot;, &quot;-&quot;: &quot;-&quot;,
-    &quot;m6&quot;: &quot;-6&quot;, &quot;-6&quot;: &quot;-6&quot;, &quot;m9&quot;: &quot;-9&quot;, &quot;-9&quot;: &quot;-9&quot;, &quot;m11&quot;: &quot;-11&quot;, &quot;-11&quot;: &quot;-11&quot;,
+    &quot;m6&quot;: &quot;-6&quot;, &quot;min6&quot;: &quot;-6&quot;, &quot;-6&quot;: &quot;-6&quot;, &quot;min9&quot;: &quot;-9&quot;, &quot;min11&quot;: &quot;-11&quot;, &quot;minmaj7&quot;: &quot;-^7&quot;, &quot;min(maj7)&quot;: &quot;-^7&quot;, &quot;m(maj7)&quot;: &quot;-^7&quot;, &quot;m9&quot;: &quot;-9&quot;, &quot;-9&quot;: &quot;-9&quot;, &quot;m11&quot;: &quot;-11&quot;, &quot;-11&quot;: &quot;-11&quot;,
     &quot;mmaj7&quot;: &quot;-^7&quot;, &quot;mM7&quot;: &quot;-^7&quot;, &quot;m^7&quot;: &quot;-^7&quot;, &quot;-^7&quot;: &quot;-^7&quot;, &quot;m&amp;#916;7&quot;: &quot;-^7&quot;, &quot;-&amp;#916;7&quot;: &quot;-^7&quot;, &quot;m&amp;#916;&quot;: &quot;-^7&quot;, &quot;-&amp;#916;&quot;: &quot;-^7&quot;,
     &quot;&amp;#248;&quot;: &quot;h7&quot;, &quot;&amp;#248;7&quot;: &quot;h7&quot;, &quot;h&quot;: &quot;h7&quot;, &quot;h7&quot;: &quot;h7&quot;, &quot;m7b5&quot;: &quot;h7&quot;, &quot;-7b5&quot;: &quot;h7&quot;, &quot;min7b5&quot;: &quot;h7&quot;,
     &quot;&amp;#176;&quot;: &quot;o7&quot;, &quot;&amp;#176;7&quot;: &quot;o7&quot;, &quot;o&quot;: &quot;o7&quot;, &quot;o7&quot;: &quot;o7&quot;, &quot;dim&quot;: &quot;o7&quot;, &quot;dim7&quot;: &quot;o7&quot;,
@@ -735,7 +735,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     BY_FOURTHS.forEach(pc =&gt; {
       const b = document.createElement(&quot;button&quot;); b.className = &quot;chip&quot;;
       const r = spell(keyFor(pc, isMinor()), 0, 0);
-      b.innerHTML = r[0] + (r.slice(1) ? &quot;&lt;s&gt;&quot; + r.slice(1) + &quot;&lt;/s&gt;&quot; : &quot;&quot;) + (isMinor() ? &#x27;&lt;small style=&quot;font-size:.6em&quot;&gt;m&lt;/small&gt;&#x27; : &quot;&quot;);
+      b.innerHTML = r[0] + (r.slice(1) ? &quot;&lt;s&gt;&quot; + r.slice(1) + &quot;&lt;/s&gt;&quot; : &quot;&quot;) + (isMinor() ? &#x27;&lt;small style=&quot;font-size:.5em;letter-spacing:0&quot;&gt;min&lt;/small&gt;&#x27; : &quot;&quot;);
       b.setAttribute(&quot;aria-pressed&quot;, String(sel().includes(pc)));
       b.onclick = () =&gt; { const s = sel(), i = s.indexOf(pc); if (i &gt;= 0) { if (s.length === 1) return; s.splice(i, 1); } else s.push(pc); changed(true); };
       chips.appendChild(b);

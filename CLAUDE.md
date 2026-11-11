@@ -19,6 +19,8 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   (D♭/C♯, E♭/D♯, G♭/F♯, A♭/G♯, B♭/A♯), major and minor alike; default Flats. It only changes how keys are written,
   never which keys are chosen or their order. Chords are spelled from the key. iReal roots are ASCII (`Bb`, `F#`);
   E♯/B♯/C♭/F♭ and double accidentals are respelled (so D♯ major's ii shows as F–7). There are no flat-key/sharp-key presets.
+- Wording: minor is written lowercase **min** (min7, min6, min(maj7), key chips "Cmin"), never "m"; the symbol may follow in
+  parentheses, e.g. "min7 (–7)".
 - Qualities in iReal syntax: ii `-7` (major) / `h7` (minor), I `^7` / i `-6`, dominants `7`, `13`, `7b9`, `7alt`.
   Minor keys never get `13` (a natural 13 fights the key) — "13" falls back to `7` there.
 - Progressions are one grouped menu (keep this order and grouping):
