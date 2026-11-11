@@ -35,7 +35,7 @@ resize="""<script>
 inner=('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
   f'<title>{title}</title>{head_tags.replace(chr(10),"")}<style>html{{-webkit-text-size-adjust:100%}}body{{margin:0}}[hidden]{{display:none!important}}{emb_style}</style></head><body>'+emb_body+resize+'</body></html>')
 inner=inner.encode('ascii','xmlcharrefreplace').decode()
-block=('<!-- Flip 251 Charts: paste this whole block into a Squarespace Code Block -->\n'
+block=('<!-- 251 Charts: paste this whole block into a Squarespace Code Block -->\n'
   '<iframe id="flip251-charts" title="ii-V-I chart builder for iReal Pro" style="display:block;width:100%;max-width:1200px;margin:0 auto;border:0;height:2100px;" '
   'allow="clipboard-write; web-share" srcdoc="'+html.escape(inner,quote=True)+'"></iframe>\n<script>\n  window.addEventListener("message", function (e) {\n'
   '    var f = document.getElementById("flip251-charts");\n    if (f && e.source === f.contentWindow && e.data && e.data.flip251Height) f.style.height = e.data.flip251Height + "px";\n  });\n</script>\n')
@@ -75,7 +75,7 @@ app_sw = """<script>
 page = standalone.replace("<title>", app_head + "<title>", 1).replace("</style>\n</head>", app_css + "</style>\n</head>", 1).replace("</body>", app_sw + "</body>", 1)
 open(os.path.join(ROOT, 'index.html'), 'w').write(page)
 manifest = {
-  "name": "Flip 251 Charts", "short_name": "251 Charts",
+  "name": "251 Charts", "short_name": "251 Charts",
   "description": "Design a custom ii-V-I exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF.",
   "start_url": "./", "scope": "./", "display": "standalone", "orientation": "any",
   "background_color": "#e7e2d8", "theme_color": "#e7e2d8",
@@ -87,7 +87,7 @@ manifest = {
 }
 open(os.path.join(ROOT, 'manifest.webmanifest'), 'w').write(json.dumps(manifest, indent=2))
 _ver = hashlib.sha1(page.encode()).hexdigest()[:10]
-open(os.path.join(ROOT, 'sw.js'), 'w').write(("""// Flip 251 Charts: keeps the app usable offline.
+open(os.path.join(ROOT, 'sw.js'), 'w').write(("""// 251 Charts: keeps the app usable offline.
 const CACHE = "chart251-__VERSION__";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "favicon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });

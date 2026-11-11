@@ -1,4 +1,4 @@
-# Flip 251 Charts — notes for whoever works on this next
+# 251 Charts — notes for whoever works on this next
 
 A teaching tool: build a ii–V–I (and related) drill through the keys, preview it as a lead sheet, send it to
 iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip251-charts/ (GitHub Pages, `main`, root).

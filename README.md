@@ -1,4 +1,4 @@
-# Flip 251 Charts
+# 251 Charts
 
 Design a custom exercise with basic chord progressions (ii–V–I, ii–V, iii–VI–ii–V, backdoor ii–V) through the keys, then send it to iReal Pro or save it as a PDF.
 
