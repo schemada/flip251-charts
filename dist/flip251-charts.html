@@ -123,7 +123,9 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .sheethead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 10px; padding: 0 4px; min-width: 0; }
 .sheethead .t { font: 600 18px var(--font-flap); color: var(--w-ink); letter-spacing: .04em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheethead .m { font: 600 9.5px var(--font-label); letter-spacing: .14em; color: var(--w-dim); white-space: nowrap; text-transform: uppercase; }
-.sheetimg { display: block; width: 100%; height: auto; -webkit-touch-callout: default; -webkit-user-select: auto; user-select: auto; }
+/* the chart picture: press-and-hold should offer Save Image, never start selecting text (or iOS Live Text in it) */
+.sheetimg { display: block; width: 100%; height: auto; -webkit-touch-callout: default; -webkit-user-select: none; user-select: none; }
+.window { -webkit-user-select: none; user-select: none; }
 .line { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; }
 .bar {
   border-left: 1.5px solid var(--w-rule); padding: 8px 6px 6px; min-width: 0; overflow: hidden;

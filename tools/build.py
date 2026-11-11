@@ -60,7 +60,12 @@ app_css = """
 /* as an installed app: clear the notch and home bar, no rubber-band scrolling past the ends */
 html { overscroll-behavior: none; }
 body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); padding-bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 14px)); }
-@media (display-mode: standalone) { body { -webkit-touch-callout: none; } .sheetimg { -webkit-touch-callout: default; } }
+/* behaves like an app: no accidental text selection while tapping around; the title field still edits normally */
+@media (display-mode: standalone) {
+  body { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  input, textarea { -webkit-user-select: text; user-select: text; }
+  .sheetimg { -webkit-touch-callout: default; }
+}
 """
 app_sw = """<script>
   // works offline after the first visit
