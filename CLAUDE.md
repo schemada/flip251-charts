@@ -25,7 +25,7 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   Backdoor iv–♭VII7–I (4 / 2, major only, bar 4 holds I). Order in the picker: ii–V–I, ii–V, iii–VI–ii–V, Backdoor.
 - Bar 4 of long ii–V–I: hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;
   "Random mix" picks a type per dominant and greys out those two selectors.
-- Order (a menu): Cycle of 4ths (default), Down whole steps, Down half steps, Up minor 3rds, Down major 3rds (Coltrane),
+- Order (a menu): Cycle of 4ths (default), Down whole steps, Down half steps, Up minor 3rds, Up major 3rds (Coltrane),
   Shuffled. All but Shuffled walk from "Start on" (greyed out, not hidden, for Shuffled). When a walk closes up before
   12 keys (whole steps, 3rds) it slips a half step in the same direction to the next unused key and continues, so
   every key appears once. "Shuffle again" picks a new start key (or a new random order for Shuffled). Default title
