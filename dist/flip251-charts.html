@@ -101,6 +101,7 @@ button { -webkit-user-select: none; user-select: none; touch-action: manipulatio
 }
 select.field { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #6c6150 50%), linear-gradient(135deg, #6c6150 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 28px; }
 .wide { grid-column: 1 / -1; }
+.keyrow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%; justify-self: stretch; }
 .ctl.off { opacity: .4; }
 .rocker.prog button { flex: 1 1 auto; text-transform: none; letter-spacing: .01em; font: 600 15px var(--font-flap); padding: 8px 8px; }
 .rocker.wrap { flex-wrap: wrap; }
@@ -282,11 +283,15 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     </div>
     <div class="ctl wide">
       <span class="cap" id="keysCap">Keys</span>
-      <div class="rocker" role="group" aria-label="Key presets">
-        <button id="p-all" aria-pressed="true">All 12</button>
-        <button id="p-flat" aria-pressed="false"><span class="sym">♭</span> keys</button>
-        <button id="p-sharp" aria-pressed="false"><span class="sym">♯</span> keys</button>
-        <button id="p-start" aria-pressed="false">Starter</button>
+      <div class="keyrow">
+        <div class="rocker" role="group" aria-label="Key presets">
+          <button id="p-all" aria-pressed="true">All 12</button>
+          <button id="p-start" aria-pressed="false">Starter</button>
+        </div>
+        <div class="rocker" role="group" aria-label="Show black-key keys as flats or sharps">
+          <button id="sp-flat" aria-pressed="true"><span class="sym">♭</span> Flats</button>
+          <button id="sp-sharp" aria-pressed="false"><span class="sym">♯</span> Sharps</button>
+        </div>
       </div>
       <div class="chips" id="chips" role="group" aria-label="Keys to include"></div>
     </div>
@@ -333,8 +338,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const MAJ = { 0:[0,0], 1:[1,-1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[4,-1], 7:[4,0], 8:[5,-1], 9:[5,0], 10:[6,-1], 11:[6,0] };
   const MIN = { 0:[0,0], 1:[0,1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[3,1], 7:[4,0], 8:[4,1], 9:[5,0], 10:[6,-1], 11:[6,0] };
   const PRESETS = {
-    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], flat: [5,10,3,8,1,6], sharp: [7,2,9,4,11,6], start: [0,5,7,10] },
-    minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], flat: [2,7,0,5,10,3], sharp: [4,11,6,1,8,3], start: [9,2,4,0] }
+    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10] },
+    minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
   };
   // progressions: name, whether minor is available, bars per key in long / short
   const PROGS = {
@@ -345,7 +350,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   };
   const state = {
     prog: "251", minor: false, short: false, turn: "hold", order: "cycle", start: 0, mix: false,
-    domV: "ext", domVI: "ext", reps: 1, style: "Medium Swing", pdf: "dark",
+    domV: "ext", domVI: "ext", reps: 1, style: "Medium Swing", pdf: "dark", acc: "flat",
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
   try {
@@ -359,14 +364,15 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if ([1,2].includes(s.reps)) state.reps = s.reps;
     if (typeof s.style === "string") state.style = s.style;
     if (["dark","light"].includes(s.pdf)) state.pdf = s.pdf;
+    if (["flat","sharp"].includes(s.acc)) state.acc = s.acc;
     const ok = a => Array.isArray(a) && a.length && a.every(p => Number.isInteger(p) && p >= 0 && p < 12);
     if (s.sel && ok(s.sel.major)) state.sel.major = s.sel.major;
     if (s.sel && ok(s.sel.minor)) state.sel.minor = s.sel.minor;
   } catch (e) {}
   function save() {
     try {
-      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel } = state;
-      localStorage.setItem("chart251", JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, sel }));
+      const { prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, acc, sel } = state;
+      localStorage.setItem("chart251", JSON.stringify({ prog, minor, short, turn, order, start, mix, domV, domVI, reps, style, pdf, acc, sel }));
     } catch (e) {}
   }
   const isMinor = () => state.minor && PROGS[state.prog].minor;     // backdoor and iii–VI–ii–V are major-key sounds
@@ -374,11 +380,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const sel = () => state.sel[Q()];
   const barsPerKey = () => PROGS[state.prog].bars[state.short ? 1 : 0];
 
+  // The five black-key keys are written as flats or sharps, whichever the viewer prefers (D♭/C♯, E♭/D♯, G♭/F♯,
+  // A♭/G♯, B♭/A♯), in major and minor alike. Each chord is then spelled from that key.
+  const BLACK = { 1: [[1,-1],[0,1]], 3: [[2,-1],[1,1]], 6: [[4,-1],[3,1]], 8: [[5,-1],[4,1]], 10: [[6,-1],[5,1]] };
   function keyFor(pc, minor) {
-    if (!minor && pc === 6) {
-      const s = state.sel.major;
-      return [7,2,9,4,11].filter(p => s.includes(p)).length > [5,10,3,8,1].filter(p => s.includes(p)).length ? [3,1] : [4,-1];
-    }
+    if (BLACK[pc]) return BLACK[pc][state.acc === "sharp" ? 1 : 0];
     return (minor ? MIN : MAJ)[pc];
   }
   function spell(key, steps, semis) {
@@ -520,7 +526,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       chips.appendChild(b);
     });
     const now = sel().slice().sort((a, b) => a - b).join();
-    ["all","flat","sharp","start"].forEach(p => press("p-" + p, PRESETS[Q()][p].slice().sort((a, b) => a - b).join() === now));
+    ["all","start"].forEach(p => press("p-" + p, PRESETS[Q()][p].slice().sort((a, b) => a - b).join() === now));
+    press("sp-flat", state.acc !== "sharp"); press("sp-sharp", state.acc === "sharp");
     $("keysCap").textContent = "Keys · " + sel().length + " of 12";
     const st = $("start"), s2 = sel(), list = BY_FOURTHS.filter(p => s2.includes(p));
     st.innerHTML = '<option value="-1">Any key</option>' + list.map(p => {
@@ -578,7 +585,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $("pdf-light").onclick = () => { state.pdf = "light"; save(); render(); };
   $("style").onchange = e => { state.style = e.target.value; changed(false); };
   $("start").onchange = e => { state.start = Number(e.target.value); changed(true); };
-  ["all","flat","sharp","start"].forEach(p => $("p-" + p).onclick = () => { state.sel[Q()] = PRESETS[Q()][p].slice(); changed(true); });
+  ["all","start"].forEach(p => $("p-" + p).onclick = () => { state.sel[Q()] = PRESETS[Q()][p].slice(); changed(true); });
+  // flats/sharps only changes how keys are written; the chosen keys and their order stay put
+  $("sp-flat").onclick = () => { state.acc = "flat"; changed(false); };
+  $("sp-sharp").onclick = () => { state.acc = "sharp"; changed(false); };
   $("title").oninput = () => render();
   // Shuffle again re-deals everything; while cycling it also picks a new starting key
   $("reshuffle").onclick = () => {
