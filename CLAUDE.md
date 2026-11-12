@@ -66,6 +66,8 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   second time (no repeat signs) — in the preview, the PDF and iReal alike. Only longer charts use repeats.
 - Barlines: single for every measure (same ink as doubles, just thinner), double at each key change, repeat signs when
   "Twice" needs them (`{ }` in iReal) including `:‖:` where two keys meet mid-line, thin-thick final bar.
+- Chord size: one size for the whole chart (like iReal's fixed cells) — the size at which the widest symbol fits its
+  share of a bar (floor 40%). Never size chords one by one (it looked uneven with busy bars).
 - Key names: Show / Hide switch (hides them in the preview, PDF and iReal).
 - Teaching note (optional, 120 chars): shown under the header in the preview and PDF, and in iReal as a comment
   `<*72…>` on the first bar. Just a free-text box — no premade prompts.
