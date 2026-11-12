@@ -105,9 +105,9 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .progrow.two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 .custom { display: grid; gap: 6px; width: 100%; justify-self: stretch; }
 .custom .field { font: 600 14px var(--font-label); }
-.keyrow { display: flex; align-items: center; gap: 10px; }
-.keyrow .cap { margin: 0; white-space: nowrap; }
-.keyrow .field { flex: 1; min-width: 0; }
+.ckrow { display: flex; align-items: center; gap: 10px; }
+.ckrow .cap { margin: 0; white-space: nowrap; }
+.ckrow .field { flex: 1; min-width: 0; }
 .help { margin: 0; font: 500 10.5px/1.5 var(--font-label); color: var(--label); }
 .help.warn { color: #9a3412; min-height: 0; }
 .help.warn:empty { display: none; }
@@ -247,7 +247,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       </div>
       <div class="custom" id="customRow" hidden>
         <input class="field" id="custom" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="D-7 G7 | Cmaj7   or   ii-7 V7 | Imaj7" aria-describedby="customHelp">
-        <div class="keyrow" id="ckRow" hidden>
+        <div class="ckrow" id="ckRow" hidden>
           <label class="cap" for="customKey">Written in</label>
           <select class="field" id="customKey"></select>
         </div>
@@ -332,15 +332,26 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     <div class="ctl">
       <span class="cap">iReal style</span>
       <select class="field" id="style" aria-label="iReal Pro style">
-        <option>Medium Swing</option>
-        <option>Up Tempo Swing</option>
-        <option>Medium Up Swing</option>
-        <option>Ballad</option>
-        <option>Bossa Nova</option>
-        <option>Latin</option>
-        <option>Even 8ths</option>
-        <option>Funk</option>
+        <optgroup label="Hear the harmony">
+          <option>Long Notes</option>
+        </optgroup>
+        <optgroup label="Swing with comping">
+          <option>Medium Swing</option>
+          <option>Medium Up Swing</option>
+          <option>Up Tempo Swing</option>
+          <option>Ballad</option>
+        </optgroup>
+        <optgroup label="Straight 8th feel with comping">
+          <option>Bossa Nova</option>
+          <option>Latin</option>
+          <option>Even 8ths</option>
+          <option>Funk</option>
+        </optgroup>
       </select>
+    </div>
+    <div class="ctl">
+      <label class="cap" for="tempo">Tempo (BPM)</label>
+      <input class="field" id="tempo" type="number" inputmode="numeric" min="40" max="400" step="1" placeholder="iReal default" autocomplete="off">
     </div>
     <div class="ctl wide">
       <span class="cap" id="keysCap">Keys</span>
@@ -454,7 +465,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const state = {
     prog: "251", minor: false, short: false, turn: "hold", order: "cycle", start: 0, mix: false,
     domV: "ext", domVI: "ext", reps: 1, style: "Medium Swing", pdf: "dark", acc: "flat",
-    chordQ: "^7", custom: "", customKey: "auto", note: "", hideKeys: false,
+    tempo: 0, chordQ: "^7", custom: "", customKey: "auto", note: "", hideKeys: false,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
   // copy any valid settings from a saved object onto the state (used on load)
@@ -468,6 +479,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     ["domV","domVI"].forEach(k => { if (DOMS.includes(s[k])) state[k] = s[k]; });
     if ([1,2].includes(s.reps)) state.reps = s.reps;
     if (typeof s.style === "string") state.style = s.style;
+    if (Number.isInteger(s.tempo) && (s.tempo === 0 || (s.tempo >= 40 && s.tempo <= 400))) state.tempo = s.tempo;
     if (["dark","light"].includes(s.pdf)) state.pdf = s.pdf;
     if (["flat","sharp"].includes(s.acc)) state.acc = s.acc;
     if (CHORDQ[s.chordQ]) state.chordQ = s.chordQ;
@@ -478,7 +490,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (s.sel && ok(s.sel.major)) state.sel.major = s.sel.major.slice();
     if (s.sel && ok(s.sel.minor)) state.sel.minor = s.sel.minor.slice();
   }
-  const SAVED = ["prog","minor","short","turn","order","start","mix","domV","domVI","reps","style","pdf","acc","chordQ","custom","customKey","note","hideKeys"];
+  const SAVED = ["prog","minor","short","turn","order","start","mix","domV","domVI","reps","style","tempo","pdf","acc","chordQ","custom","customKey","note","hideKeys"];
   function snapshot() {
     const o = {}; SAVED.forEach(k => o[k] = state[k]);
     o.sel = { major: state.sel.major.slice(), minor: state.sel.minor.slice() };
@@ -783,7 +795,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     });
     return out;
   }
-  const noteText = () => state.note.trim().replace(/[<>=|]/g, " ").replace(/\s+/g, " ");
+  const noteText = () => state.note.trim().replace(/[\uD800-\uDFFF]/g, "").replace(/[<>=|]/g, " ").replace(/\s+/g, " ");
   function music() {
     const rpt = useRepeats(), twice = writtenOut();
     const open = rpt ? "{" : "[", close = rpt ? "}" : "]";
@@ -808,11 +820,32 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     return name + q + len + " (" + ORDERS[state.order].title + ")";
   }
   function chartTitle() { return ($("title").value.trim() || defaultTitle()).replace(/=/g, "-"); }
+  /* iReal Pro's own link format (what iReal exports): irealb://Title=Composer==Style=Key==Music=Playback=BPM=Repeats
+     The music is lightly scrambled the way iReal does it: a fixed prefix, then every 50-character block (except a
+     block followed by fewer than 2 characters) has its ends swapped. The swap is its own inverse.
+     The playback field picks an exact iReal style; empty means "iReal's default for the Style name".
+     BPM 0 = iReal's default tempo; repeats 0 = iReal's default. Instruments live in iReal's mixer, not the link. */
+  const PLAYBACK = { "Long Notes": { style: "Medium Swing", comp: "Jazz-Long Notes" } };
+  function scramble50(s) {
+    const n = s.split("");
+    for (let i = 0; i < 5; i++) { n[49 - i] = s[i]; n[i] = s[49 - i]; }
+    for (let i = 10; i < 24; i++) { n[49 - i] = s[i]; n[i] = s[49 - i]; }
+    return n.join("");
+  }
+  function scramble(s) {
+    let out = "";
+    while (s.length > 50) {
+      const block = s.slice(0, 50); s = s.slice(50);
+      out += s.length < 2 ? block : scramble50(block);
+    }
+    return "1r34LbKcu7" + out + s;
+  }
   function url() {
     const k = ireal(spell(keyFor(order[0], isMinor()), 0, 0)) + (isMinor() ? "-" : "");
+    const pb = PLAYBACK[state.style] || { style: state.style, comp: "" };
     // iReal Pro shows the composer as "First Last" from "Last First", so this reads "251 Charts" in the app
-    const fields = [chartTitle(), "Charts 251", state.style, k, "n", music()];
-    return "irealbook://" + fields.map(encodeURIComponent).join("=");
+    const fields = [chartTitle(), "Charts 251", "", pb.style, k, "", scramble(music()), pb.comp, String(state.tempo || 0), "0"];
+    return "irealb://" + fields.map(encodeURIComponent).join("=");
   }
 
   /* ---------- preview ---------- */
@@ -908,6 +941,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     $("viCtl").classList.toggle("off", state.mix || !usesVI);
     press("r-1", state.reps === 1); press("r-2", state.reps === 2);
     $("style").value = state.style;
+    if (document.activeElement !== $("tempo")) $("tempo").value = state.tempo ? state.tempo : "";
     press("pdf-dark", state.pdf === "dark"); press("pdf-light", state.pdf === "light");
     press("k-show", !state.hideKeys); press("k-hide", state.hideKeys);
     $("kCtl").classList.toggle("off", q === "none");
@@ -946,6 +980,12 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   $("k-show").onclick = () => { state.hideKeys = false; changed(false); };
   $("k-hide").onclick = () => { state.hideKeys = true; changed(false); };
   $("style").onchange = e => { state.style = e.target.value; changed(false); };
+  // tempo: blank = iReal's default; anything else is kept between 40 and 400
+  $("tempo").onchange = e => {
+    const v = Math.round(Number(e.target.value));
+    state.tempo = e.target.value === "" || !v ? 0 : Math.max(40, Math.min(400, v));
+    e.target.value = state.tempo || ""; changed(false);
+  };
   $("start").onchange = e => { state.start = Number(e.target.value); changed(true); };
   ["all","start"].forEach(p => $("p-" + p).onclick = () => { state.sel[Q()] = PRESETS[Q()][p].slice(); changed(true); });
   // flats/sharps only changes how keys are written; the chosen keys and their order stay put
@@ -1179,7 +1219,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.textAlign = "center"; c.fillStyle = PDF.ink; c.font = "700 26px " + FLAP;
     c.fillText(chartTitle(), W / 2, M + 22);
     c.textAlign = "left"; c.fillStyle = PDF.dim; c.font = "500 12px " + MONO;
-    c.fillText("(" + state.style + ")", M, M + 42);
+    c.fillText("(" + state.style + (state.tempo ? ", " + state.tempo + " bpm" : "") + ")", M, M + 42);
     c.textAlign = "right"; c.fillText("251 Charts" + (pages > 1 ? "  ·  " + (pageIdx + 1) + "/" + pages : ""), W - M, M + 42);
     c.textAlign = "left";
     let top = M + 62;
@@ -1230,7 +1270,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = "600 9.5px " + MONO;
     const bars = chartBars().length * (useRepeats() ? 2 : 1);
-    c.fillText((order.length + " keys · " + bars + " bars · " + state.style).toUpperCase(), M, 42);
+    c.fillText((order.length + " keys · " + bars + " bars · " + state.style + (state.tempo ? " · " + state.tempo + " bpm" : "")).toUpperCase(), M, 42);
     c.fillStyle = PDF.amber; c.font = "600 11px " + MONO;
     noteLines.forEach((ln, i) => c.fillText(ln, M, 60 + i * 15));
     drawLines(c, lines, M, top, barW, lineH, S, Math.max(9, S * .42), lines.length - 1, 0);

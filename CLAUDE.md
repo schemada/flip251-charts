@@ -73,7 +73,15 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   letter's cap height — not font glyphs — so they look the same everywhere.
   The half-diminished ø is drawn the same way: an open ring with a thin slash (iReal-like), never the font's heavy ø.
 - The app's name is **251 Charts** (home screen, top-right plate, PDF header). iReal composer field is `Charts 251` so
-  iReal displays "251 Charts". Legacy `irealbook://` links (no tempo field). 4/4 only (a 3/4 option was tried and dropped).
+  iReal displays "251 Charts". 4/4 only (a 3/4 option was tried and dropped).
+- Links use iReal's own export format, `irealb://Title=Composer==Style=Key==Music=Playback=BPM=Repeats`, with the
+  music scrambled exactly as iReal does (prefix `1r34LbKcu7`, 50-char blocks with their ends swapped) — checked
+  against a chart the owner exported from iReal Pro 2026.9. Playback "" = iReal's default for the Style name.
+- iReal style menu, grouped by what you're practising: **Hear the harmony**: Long Notes (Style "Medium Swing",
+  playback `Jazz-Long Notes`); **Swing with comping**: Medium Swing, Medium Up Swing, Up Tempo Swing, Ballad;
+  **Straight 8th feel with comping** (owner's wording — not "straight feel"): Bossa Nova, Latin, Even 8ths, Funk.
+  Tempo (BPM) box: blank = iReal's default, else 40–400. Instruments (Rhodes, strings bass, quieter drums) can't be
+  set from a link — they live in iReal's mixer.
 
 **Copy and layout**
 - Intro: "Design a custom exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF."
