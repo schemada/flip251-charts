@@ -246,7 +246,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
           &lt;label class=&quot;cap&quot; for=&quot;customKey&quot;&gt;Written in&lt;/label&gt;
           &lt;select class=&quot;field&quot; id=&quot;customKey&quot;&gt;&lt;/select&gt;
         &lt;/div&gt;
-        &lt;p class=&quot;help&quot; id=&quot;customHelp&quot;&gt;Type chord symbols in any key (&lt;b&gt;D-7 G7 | Cmaj7 | Bmin7b5 E7 | Amin7&lt;/b&gt;) or roman numerals (&lt;b&gt;ii-7 V7 | Imaj7&lt;/b&gt;). Bars split with &lt;b&gt;|&lt;/b&gt;, &lt;b&gt;%&lt;/b&gt; repeats a bar. Bare numerals: lowercase is min7, uppercase is 7 (I and IV are maj7). Plain 7 chords follow the Dominants setting.&lt;/p&gt;
+        &lt;p class=&quot;help&quot; id=&quot;customHelp&quot;&gt;Type chord symbols in any key (&lt;b&gt;D-7 G7 | Cmaj7 | Bmin7b5 E7 | Amin7&lt;/b&gt;) or roman numerals (&lt;b&gt;ii-7 V7 | Imaj7&lt;/b&gt;). Bars split with &lt;b&gt;|&lt;/b&gt;, &lt;b&gt;%&lt;/b&gt; repeats a bar. Slash chords work: &lt;b&gt;Cmaj7/G&lt;/b&gt;, &lt;b&gt;D-7/G&lt;/b&gt;; with numerals, &lt;b&gt;V7/ii&lt;/b&gt; means V7 of ii. Bare numerals: lowercase is min7, uppercase is 7 (I and IV are maj7). Plain 7 chords follow the Dominants setting.&lt;/p&gt;
         &lt;p class=&quot;help warn&quot; id=&quot;customErr&quot;&gt;&lt;/p&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -569,16 +569,21 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         if (bar.some(c =&gt; c.rep)) { bad.push(t); return; }
         const n = t.normalize(&quot;NFC&quot;).replace(/&amp;#9837;/g, &quot;b&quot;).replace(/&amp;#9839;/g, &quot;#&quot;).replace(/&amp;#8211;/g, &quot;-&quot;);
         // a chord symbol (D-7, Cmaj7, Bbm7b5&amp;#8230;): kept as letters for now, placed in the key once it&#x27;s known
-        const cm = n.match(/^([A-G])([b#]?)(.*)$/);
+        const cm = n.replace(&quot;6/9&quot;, &quot;69&quot;).match(/^([A-G])([b#]?)([^/]*)(?:\/([A-G])([b#]?))?$/);
         if (cm) {
           const qual = mapQual(cm[3]);
-          if (qual === null || /\//.test(cm[3])) { bad.push(/\//.test(cm[3]) ? t + &quot; (no slash chords yet)&quot; : t); return; }
+          if (qual === null) { bad.push(t); return; }
           const li = LETTERS.indexOf(cm[1]), pc = (NAT[li] + (cm[2] === &quot;b&quot; ? 11 : cm[2] === &quot;#&quot; ? 1 : 0)) % 12;
           const c = { li, pc, qual, dom: qual === &quot;7&quot;, cls: qClass(qual) };
+          // slash chord: the bass note is placed in the key the same way as the root
+          if (cm[4]) { const bl = LETTERS.indexOf(cm[4]); c.bass = { li: bl, pc: (NAT[bl] + (cm[5] === &quot;b&quot; ? 11 : cm[5] === &quot;#&quot; ? 1 : 0)) % 12 }; }
           abs.push(c); bar.push(c); return;
         }
-        // a roman numeral (ii-7, V7b9, bVII7&amp;#8230;)
-        const m = n.match(/^([b#]?)(vii|vi|v|iv|iii|ii|i)(.*)$/i);
+        // a roman numeral (ii-7, V7b9, bVII7&amp;#8230;); &quot;V7/ii&quot; is an applied chord: V7 of ii
+        let of = null, rn = n.replace(&quot;6/9&quot;, &quot;69&quot;);
+        const ap = rn.match(/^(.*)\/([b#]?)(vii|vi|v|iv|iii|ii|i)$/i);
+        if (ap) { const [st, se] = NUMERALS[ap[3].toLowerCase()]; of = [st, se + (ap[2] === &quot;b&quot; ? -1 : ap[2] === &quot;#&quot; ? 1 : 0)]; rn = ap[1]; }
+        const m = rn.match(/^([b#]?)(vii|vi|v|iv|iii|ii|i)(.*)$/i);
         if (!m || /[A-Z]/.test(m[1])) { bad.push(t); return; }
         const num = m[2], low = num === num.toLowerCase(), up = num === num.toUpperCase();
         if (!low &amp;&amp; !up) { bad.push(t); return; }
@@ -588,7 +593,9 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
           const k = num.toLowerCase();
           qual = low ? (k === &quot;vii&quot; ? &quot;h7&quot; : &quot;-7&quot;) : (k === &quot;i&quot; || k === &quot;iv&quot; ? &quot;^7&quot; : &quot;7&quot;);
         } else if ((qual = mapQual(m[3])) === null) { bad.push(t); return; }
-        bar.push({ steps, semis: semis + (m[1] === &quot;b&quot; ? -1 : m[1] === &quot;#&quot; ? 1 : 0), qual, dom: qual === &quot;7&quot; });  // plain 7ths follow the Dominants setting
+        let st = steps, se = semis + (m[1] === &quot;b&quot; ? -1 : m[1] === &quot;#&quot; ? 1 : 0);
+        if (of) { st = (st + of[0]) % 7; se = ((se + of[1]) % 12 + 12) % 12; }
+        bar.push({ steps: st, semis: se, qual, dom: qual === &quot;7&quot; });  // plain 7ths follow the Dominants setting
       });
       if (bar.length &gt; 4) { bad.push(&quot;(more than 4 chords in a bar)&quot;); bar.length = 4; }
       if (bar.length) bars.push(bar);
@@ -607,7 +614,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       const li = same ? same.li : keyFor(found.pc, found.minor)[0];
       key = { pc: found.pc, minor: found.minor, auto: !ov, name: spell([li, accOf(li, found.pc)], 0, 0) + (found.minor ? &quot; minor&quot; : &quot; major&quot;) };
       // each chord as steps/semitones above that key, keeping the letter relationship it was written with
-      abs.forEach(c =&gt; { c.steps = (c.li - li + 7) % 7; c.semis = (c.pc - found.pc + 12) % 12; });
+      abs.forEach(c =&gt; {
+        c.steps = (c.li - li + 7) % 7; c.semis = (c.pc - found.pc + 12) % 12;
+        if (c.bass) { c.bsteps = (c.bass.li - li + 7) % 7; c.bsemis = (c.bass.pc - found.pc + 12) % 12; }
+      });
     }
     return { bars: bars.slice(0, 16), bad: [...new Set(bad)], key };
   }
@@ -675,7 +685,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         const flat = customParsed.bars.flat().filter(c =&gt; !c.rep);
         const toMinor = c =&gt; { const nx = flat[flat.indexOf(c) + 1];
           return !!nx &amp;&amp; ((nx.semis - c.semis) % 12 + 12) % 12 === 5 &amp;&amp; /^(min|hdim)$/.test(qClass(nx.qual)); };
-        return customParsed.bars.map(bar =&gt; bar.map(c =&gt; c.rep ? &quot;x&quot; : r(c.steps, c.semis) + (c.dom ? dq(&quot;v&quot;, minor || toMinor(c)) : c.qual)));
+        return customParsed.bars.map(bar =&gt; bar.map(c =&gt; c.rep ? &quot;x&quot; : r(c.steps, c.semis) + (c.dom ? dq(&quot;v&quot;, minor || toMinor(c)) : c.qual) + (c.bass ? &quot;/&quot; + r(c.bsteps, c.bsemis) : &quot;&quot;)));
       }
       default: {
         const V = r(4, 7) + dq(&quot;v&quot;, minor);
@@ -775,7 +785,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   function defaultTitle() {
     const p = P();
     const name = state.prog === &quot;one&quot; ? CHORDQ[state.chordQ] + &quot; Chords&quot; : p.name;
-    const q = p.q === &quot;choose&quot; ? (state.minor ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;;
+    const q = p.q === &quot;choose&quot; ? (isMinor() ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;;
     const len = p.bars ? &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) : &quot;&quot;;
     return name + q + len + &quot; (&quot; + ORDERS[state.order].title + &quot;)&quot;;
   }
@@ -1082,7 +1092,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   function drawChord(c, tok, x, y, S, dry) {
     const put = (t, px, py) =&gt; { if (!dry) c.fillText(t, px, py); };
     if (tok === &quot;x&quot;) { c.fillStyle = PDF.dim; c.font = &quot;500 &quot; + S + &quot;px &quot; + FLAP; put(&quot;%&quot;, x + S * .15, y); return S; }
-    const m = tok.match(/^([A-G])([b#]?)(.*)$/);
+    const m = tok.match(/^([A-G])([b#]?)([^/]*)(?:\/([A-G])([b#]?))?$/);
     // iReal spelling to lead-sheet symbols: ^ &amp;#8594; &amp;#916;, h &amp;#8594; &amp;#248;, o &amp;#8594; &amp;#176;, - &amp;#8594; &amp;#8211;
     const q = m[3].replace(/\^/g, &quot;&amp;#916;&quot;).replace(/h/g, &quot;&amp;#248;&quot;).replace(/o/g, &quot;&amp;#176;&quot;).replace(/-/g, &quot;&amp;#8211;&quot;);
     let cx = x;
@@ -1110,6 +1120,18 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         put(part.slice(1), cx, qy); cx += c.measureText(part.slice(1)).width;
       } else { put(part, cx, qy); cx += c.measureText(part).width; }
     });
+    // slash chord: &quot;/E&amp;#9837;&quot; after the symbol, a little smaller than the root, on the same baseline
+    if (m[4]) {
+      const bs = S * .6;
+      c.font = &quot;600 &quot; + bs + &quot;px &quot; + FLAP;
+      const bcap = capOf(c, bs);
+      cx += bs * .02; put(&quot;/&quot;, cx, y); cx += c.measureText(&quot;/&quot;).width;
+      put(m[4], cx, y); cx += c.measureText(m[4]).width;
+      if (m[5]) {
+        const h = bcap * (m[5] === &quot;b&quot; ? .78 : .9), top = y - bcap * (m[5] === &quot;b&quot; ? 1.03 : 1.1);
+        cx += bs * .03; cx += accShape(c, m[5], cx, top, h, dry) + bs * .02;
+      }
+    }
     return cx - x;
   }
   function drawLabel(c, text, x, y, size) {
