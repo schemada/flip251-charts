@@ -224,16 +224,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
             &lt;option value=&quot;custom&quot;&gt;Custom progression&amp;#8230;&lt;/option&gt;
           &lt;/optgroup&gt;
         &lt;/select&gt;
-        &lt;select class=&quot;field&quot; id=&quot;chordQ&quot; aria-label=&quot;Chord quality&quot; hidden&gt;
-          &lt;option value=&quot;^7&quot;&gt;maj7 (&amp;#916;7)&lt;/option&gt;
-          &lt;option value=&quot;-7&quot;&gt;min7 (&amp;#8211;7)&lt;/option&gt;
-          &lt;option value=&quot;h7&quot;&gt;min7&amp;#9837;5 (&amp;#248;7)&lt;/option&gt;
-          &lt;option value=&quot;o7&quot;&gt;dim7 (&amp;#176;7)&lt;/option&gt;
-          &lt;option value=&quot;-6&quot;&gt;min6 (&amp;#8211;6)&lt;/option&gt;
-          &lt;option value=&quot;-^7&quot;&gt;min(maj7) (&amp;#8211;&amp;#916;7)&lt;/option&gt;
-          &lt;option value=&quot;7sus&quot;&gt;7sus4&lt;/option&gt;
-          &lt;option value=&quot;^7#11&quot;&gt;maj7&amp;#9839;11&lt;/option&gt;
-        &lt;/select&gt;
+        &lt;select class=&quot;field&quot; id=&quot;chordQ&quot; aria-label=&quot;Chord quality&quot; hidden&gt;&lt;/select&gt;
       &lt;/div&gt;
       &lt;div class=&quot;custom&quot; id=&quot;customRow&quot; hidden&gt;
         &lt;input class=&quot;field&quot; id=&quot;custom&quot; maxlength=&quot;200&quot; autocomplete=&quot;off&quot; autocapitalize=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;D-7 G7 | Cmaj7   or   ii-7 V7 | Imaj7&quot; aria-describedby=&quot;customHelp&quot;&gt;
@@ -452,8 +443,19 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &quot;one&quot;:   { name: &quot;&quot;,                     q: &quot;none&quot;,   bars: [2, 1], turn: false, v: null,  vi: null },
     &quot;custom&quot;:{ name: &quot;Custom&quot;,               q: &quot;choose&quot;, bars: null,   turn: false, v: &quot;Dominant&quot;, vi: null }
   };
-  const CHORDQ = { &quot;^7&quot;: &quot;Maj7&quot;, &quot;-7&quot;: &quot;Minor 7&quot;, &quot;h7&quot;: &quot;Half-Diminished&quot;, &quot;o7&quot;: &quot;Diminished 7&quot;, &quot;-6&quot;: &quot;Minor 6&quot;,
-                   &quot;-^7&quot;: &quot;Minor-Major 7&quot;, &quot;7sus&quot;: &quot;7sus4&quot;, &quot;^7#11&quot;: &quot;Maj7#11&quot; };
+  /* One chord quality: the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
+     Only qualities iReal Pro can spell and play (it has no min13, so that one is left out). */
+  const CHORD_GROUPS = [
+    [&quot;Major&quot;, [[&quot;^7&quot;, &quot;maj7 (&amp;#916;7)&quot;, &quot;Maj7&quot;], [&quot;^9&quot;, &quot;maj9 (&amp;#916;9)&quot;, &quot;Maj9&quot;], [&quot;^13&quot;, &quot;maj13 (&amp;#916;13)&quot;, &quot;Maj13&quot;], [&quot;6&quot;, &quot;6&quot;, &quot;Major 6&quot;],
+               [&quot;69&quot;, &quot;6/9&quot;, &quot;6/9&quot;], [&quot;^7#11&quot;, &quot;maj7&amp;#9839;11 (&amp;#916;7&amp;#9839;11)&quot;, &quot;Maj7#11&quot;], [&quot;^7#5&quot;, &quot;maj7&amp;#9839;5 (&amp;#916;7&amp;#9839;5)&quot;, &quot;Maj7#5&quot;]]],
+    [&quot;Minor&quot;, [[&quot;-7&quot;, &quot;min7 (&amp;#8211;7)&quot;, &quot;Min7&quot;], [&quot;-9&quot;, &quot;min9 (&amp;#8211;9)&quot;, &quot;Min9&quot;], [&quot;-11&quot;, &quot;min11 (&amp;#8211;11)&quot;, &quot;Min11&quot;],
+               [&quot;-6&quot;, &quot;min6 (&amp;#8211;6)&quot;, &quot;Min6&quot;], [&quot;-^7&quot;, &quot;min(maj7) (&amp;#8211;&amp;#916;7)&quot;, &quot;Min-Maj7&quot;]]],
+    [&quot;Dominant&quot;, [[&quot;7&quot;, &quot;7&quot;, &quot;Dominant 7&quot;], [&quot;9&quot;, &quot;9&quot;, &quot;Dominant 9&quot;], [&quot;13&quot;, &quot;13&quot;, &quot;Dominant 13&quot;], [&quot;7b9&quot;, &quot;7&amp;#9837;9&quot;, &quot;7b9&quot;],
+                  [&quot;7#9&quot;, &quot;7&amp;#9839;9&quot;, &quot;7#9&quot;], [&quot;7#11&quot;, &quot;7&amp;#9839;11&quot;, &quot;7#11&quot;], [&quot;7b13&quot;, &quot;7&amp;#9837;13&quot;, &quot;7b13&quot;], [&quot;7#5&quot;, &quot;7&amp;#9839;5&quot;, &quot;7#5&quot;], [&quot;7alt&quot;, &quot;7alt&quot;, &quot;7alt&quot;]]],
+    [&quot;Sus&quot;, [[&quot;7sus&quot;, &quot;7sus4&quot;, &quot;7sus4&quot;], [&quot;9sus&quot;, &quot;9sus4&quot;, &quot;9sus4&quot;], [&quot;7b9sus&quot;, &quot;7&amp;#9837;9sus4&quot;, &quot;7b9sus4&quot;]]],
+    [&quot;Diminished&quot;, [[&quot;h7&quot;, &quot;min7&amp;#9837;5 (&amp;#248;7)&quot;, &quot;Half-Diminished&quot;], [&quot;h9&quot;, &quot;min9&amp;#9837;5 (&amp;#248;9)&quot;, &quot;Half-Diminished 9&quot;], [&quot;o7&quot;, &quot;dim7 (&amp;#176;7)&quot;, &quot;Diminished 7&quot;]]]
+  ];
+  const CHORDQ = Object.fromEntries(CHORD_GROUPS.flatMap(g =&gt; g[1].map(([q, , name]) =&gt; [q, name])));
   const DOMS = [&quot;plain&quot;, &quot;ext&quot;, &quot;b9&quot;, &quot;alt&quot;];
   const state = {
     prog: &quot;251&quot;, minor: false, short: false, turn: &quot;hold&quot;, order: &quot;cycle&quot;, start: 0, mix: false,
@@ -1109,7 +1111,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (tok === &quot;x&quot;) { c.fillStyle = PDF.dim; c.font = &quot;500 &quot; + S + &quot;px &quot; + FLAP; put(&quot;%&quot;, x + S * .15, y); return S; }
     const m = tok.match(/^([A-G])([b#]?)([^/]*)(?:\/([A-G])([b#]?))?$/);
     // iReal spelling to lead-sheet symbols: ^ &amp;#8594; &amp;#916;, h &amp;#8594; &amp;#248;, o &amp;#8594; &amp;#176;, - &amp;#8594; &amp;#8211;
-    const q = m[3].replace(/\^/g, &quot;&amp;#916;&quot;).replace(/h/g, &quot;&amp;#248;&quot;).replace(/o/g, &quot;&amp;#176;&quot;).replace(/-/g, &quot;&amp;#8211;&quot;);
+    const q = m[3].replace(/\^/g, &quot;&amp;#916;&quot;).replace(/h/g, &quot;&amp;#248;&quot;).replace(/o/g, &quot;&amp;#176;&quot;).replace(/-/g, &quot;&amp;#8211;&quot;).replace(/^(&amp;#8211;?)69/, &quot;$16/9&quot;);
     let cx = x;
     c.fillStyle = PDF.ink;
     c.font = &quot;600 &quot; + S + &quot;px &quot; + FLAP; put(m[1], cx, y); cx += c.measureText(m[1]).width;
@@ -1325,6 +1327,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     btn.disabled = false;
   };
 
+  $(&quot;chordQ&quot;).innerHTML = CHORD_GROUPS.map(([label, list]) =&gt; &#x27;&lt;optgroup label=&quot;&#x27; + label + &#x27;&quot;&gt;&#x27; +
+    list.map(([q, text]) =&gt; &#x27;&lt;option value=&quot;&#x27; + q + &#x27;&quot;&gt;&#x27; + text + &quot;&lt;/option&gt;&quot;).join(&quot;&quot;) + &quot;&lt;/optgroup&gt;&quot;).join(&quot;&quot;);
   $(&quot;style&quot;).innerHTML = STYLE_GROUPS.map(([label, list]) =&gt; &#x27;&lt;optgroup label=&quot;&#x27; + label + &#x27;&quot;&gt;&#x27; +
     list.map(st =&gt; &#x27;&lt;option value=&quot;&#x27; + st + &#x27;&quot;&gt;&#x27; + styleName(st) + &quot;&lt;/option&gt;&quot;).join(&quot;&quot;) + &quot;&lt;/optgroup&gt;&quot;).join(&quot;&quot;);
   renderChips();
