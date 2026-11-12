@@ -1,5 +1,5 @@
 // 251 Charts: keeps the app usable offline.
-const CACHE = "chart251-43cc655c66";
+const CACHE = "chart251-1b96e9644f";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "favicon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {

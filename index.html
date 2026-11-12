@@ -756,21 +756,14 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     let cur = start;
     while (path.length < 12) {
       let nxt = ((cur + step) % 12 + 12) % 12;
-      if (path.includes(nxt)) {
-        while (path.includes(nxt)) nxt = ((nxt + dir) % 12 + 12) % 12;
-        slips.add(nxt);                                   // the pattern restarts here, a half step over
-      }
+      while (path.includes(nxt)) nxt = ((nxt + dir) % 12 + 12) % 12;
       path.push(nxt); cur = nxt;
     }
     return path;
   }
-  // keys where an interval walk restarts a half step over, marked ↑½ / ↓½ beside the key name
-  const slips = new Set();
-  const markFor = pc => slips.has(pc) && !state.hideKeys && keyName(pc) ? (ORDERS[state.order].step > 0 ? "↑½" : "↓½") : "";
   let dealtQ = "major";
   function deal() {
     const s = sel(); dealtQ = Q();
-    slips.clear();
     if (state.order === "random") order = shuffle(s.slice());
     else order = walk(firstKey(), ORDERS[state.order].step).filter(pc => s.includes(pc));
     rollMix();
@@ -793,7 +786,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     const out = [], twice = writtenOut();
     order.forEach((pc, k) => {
       const one = barsFor(pc, k), all = twice ? one.concat(one) : one;
-      all.forEach((chords, j) => out.push({ chords, label: j === 0 && !state.hideKeys ? keyName(pc) : "", mark: j === 0 ? markFor(pc) : "", segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
+      all.forEach((chords, j) => out.push({ chords, label: j === 0 && !state.hideKeys ? keyName(pc) : "", segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
     });
     return out;
   }
@@ -827,7 +820,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
       const one = barsFor(pc, k);
       const body = (twice ? one.concat(one) : one).map((b, i) => {
         const notes = ["", "", "", ""];
-        if (i === 0 && !state.hideKeys && keyName(pc)) notes[0] = (markFor(pc) ? markFor(pc) + " " : "") + keyName(pc);
+        if (i === 0 && !state.hideKeys && keyName(pc)) notes[0] = keyName(pc);
         // the teaching note goes at the top of the first bar (*72 lifts a comment above the chords in iReal Pro)
         if (k === 0 && i === 0 && noteText()) notes[notes[0] ? 1 : 0] = "*72" + noteText();
         return cell(b, notes);
@@ -1149,12 +1142,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     }
     return cx - x;
   }
-  function drawLabel(c, text, x, y, size, mark) {
-    if (mark) {
-      // the restart mark: smaller and quieter than the key name
-      c.save(); c.globalAlpha = .7; c.fillStyle = PDF.amber; c.font = "600 " + size + "px " + MONO;
-      c.fillText(mark, x, y); x += c.measureText(mark).width + size * .35; c.restore();
-    }
+  function drawLabel(c, text, x, y, size) {
     c.fillStyle = PDF.amber; c.font = "600 " + size + "px " + MONO;
     const m = text.match(/^([A-G])([b#]?)( .*)$/);
     if (!m) { c.fillText(text, x, y); return; }
@@ -1202,7 +1190,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
           const w = drawChord(c, tok, 0, 0, S, true), size = w > slot - 6 * s ? S * (slot - 6 * s) / w : S;
           drawChord(c, tok, x + pad + k * (barW - pad) / n, yBase, size);
         });
-        if (b.label) drawLabel(c, b.label, x + 8 * s / .9, yBar1 + labelSize * 1.15, labelSize, b.mark);
+        if (b.label) drawLabel(c, b.label, x + 8 * s / .9, yBar1 + labelSize * 1.15, labelSize);
       });
       const xEnd = x0 + line.length * barW, lastBar = line[line.length - 1];
       drawBarline(c, xEnd, yBar0, yBar1, globalLast && !rpt ? "final" : rpt && lastBar.segEnd ? "repClose" : lastBar.segEnd ? "double" : "single", s);
