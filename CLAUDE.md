@@ -48,7 +48,7 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   Up / Down minor 3rds, Up / Down major 3rds, Tritones, Shuffled — every interval both ways (nothing past a 5th: the
   rest are inversions). All but Shuffled walk from "Start on" (greyed out, not hidden, for Shuffled). When a walk
   closes up before 12 keys (whole steps, 3rds, tritones) it slips a half step in the same direction to the next unused
-  key and continues, so every key appears once. "Shuffle again" picks a new start key (or a new random order for
+  key and continues, so every key appears once. Restarts are not marked on the chart (a ↑½/↓½ mark was tried and removed). "Shuffle again" picks a new start key (or a new random order for
   Shuffled). Default title ends with the order, e.g. "(Cycle)", "(Cycle of 5ths)", "(Down Whole Steps)", "(Tritones)",
   "(Shuffled)" — never "Shuffle" (sounds like a groove).
 
