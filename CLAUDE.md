@@ -42,7 +42,8 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   °/dim…), mixed freely with numerals. The app works out the key (scores each key on chords that belong to it and on
   cadences — V7→I and ii–V — landing on its tonic, the first cadence counting most; major wins a close call; all
   dominants → the first chord), shows it in a "Written in" menu (Auto · <key>, or pick any of 24) that appears only
-  for chord symbols, and greys Quality to "Quality (from chords)". Chords keep the letter relationships they were typed
+  for chord symbols, and greys Quality to "Quality (from chords)". When the found key changes (or "Written in" is
+  changed), "Start on" jumps to that key; a start key picked by hand afterwards stays until the key changes again. Chords keep the letter relationships they were typed
   with. A plain 7 resolving down a 5th to a minor chord gets no natural 13. Slash chords are a must: `Cmaj7/G`, `D-7/G`, `A7/C#` (bass placed in the key like
   the root; iReal `C^7/G`; drawn as a smaller "/G" on the baseline). With numerals, `V7/ii` is an applied chord (V7 of ii).
 - Bar 4 of long ii–V–I (and its tritone-sub and major/minor variants): hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;

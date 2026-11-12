@@ -963,15 +963,24 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   function changed(reDeal) { save(); renderChips(); if (reDeal) deal(); render(); }
 
-  $("prog").onchange = e => { const was = Q(); state.prog = e.target.value; changed(Q() !== was); };
+  $("prog").onchange = e => { const was = Q(); state.prog = e.target.value; startFromKey = ""; const moved = followKey(); changed(moved || Q() !== was); };
   $("chordQ").onchange = e => { state.chordQ = e.target.value; changed(false); };
   let ct = 0;
+  // When typed chord symbols name a key, "Start on" jumps to it — once per key found, so a start key picked by hand
+  // afterwards stays put until the chords point somewhere new.
+  let startFromKey = "";
+  function followKey() {
+    const k = symKey() ? customParsed.key : null, id = k ? k.pc + (k.minor ? "m" : "M") : "";
+    if (!k || id === startFromKey) return false;
+    startFromKey = id; state.start = k.pc; return true;
+  }
   $("custom").oninput = e => {
     state.custom = e.target.value; customParsed = parseCustom(state.custom);
-    clearTimeout(ct); ct = setTimeout(() => changed(Q() !== dealtQ), 120);
+    clearTimeout(ct); ct = setTimeout(() => { const moved = followKey(); changed(moved || Q() !== dealtQ); }, 120);
   };
   $("customKey").onchange = e => {
-    const was = Q(); state.customKey = e.target.value; customParsed = parseCustom(state.custom); changed(Q() !== was);
+    const was = Q(); state.customKey = e.target.value; customParsed = parseCustom(state.custom);
+    const moved = followKey(); changed(moved || Q() !== was);
   };
   $("q-major").onclick = () => { state.minor = false; changed(true); };
   $("q-minor").onclick = () => { state.minor = true; changed(true); };
