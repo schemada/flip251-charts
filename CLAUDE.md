@@ -77,9 +77,11 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
 - Links use iReal's own export format, `irealb://Title=Composer==Style=Key==Music=Playback=BPM=Repeats`, with the
   music scrambled exactly as iReal does (prefix `1r34LbKcu7`, 50-char blocks with their ends swapped) — checked
   against a chart the owner exported from iReal Pro 2026.9. Playback "" = iReal's default for the Style name.
-- iReal style menu, grouped by what you're practising: **Hear the harmony**: Long Notes (Style "Medium Swing",
-  playback `Jazz-Long Notes`); **Swing with comping**: Medium Swing, Medium Up Swing, Up Tempo Swing, Ballad;
-  **Straight 8th feel with comping** (owner's wording — not "straight feel"): Bossa Nova, Latin, Even 8ths, Funk.
+- iReal style menu: all 50 built-in iReal playback styles (from the owner's iReal 2026.9 style list), sent by their
+  exact iReal names (`Jazz-…`, `Latin-…`, `Pop-…`; paid packs Blues/Brazilian/Salsa left out), grouped by purpose:
+  Hear the harmony (Long Notes) · Swing with comping · Ballads · Straight 8th feel with comping (owner's wording — not
+  "straight feel") · Two feels · Traditional · Latin · Pop. The list lives in `STYLE_GROUPS`. iReal's style text field
+  gets the short name ("Ballad Even", "Samba"). Son Montuno 2–3 / 3–2 use an en dash as shown in iReal (unverified).
   Tempo (BPM) box: blank = iReal's default, else 40–400. Instruments (Rhodes, strings bass, quieter drums) can't be
   set from a link — they live in iReal's mixer.
 

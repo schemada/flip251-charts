@@ -321,23 +321,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot;&gt;
       &lt;span class=&quot;cap&quot;&gt;iReal style&lt;/span&gt;
-      &lt;select class=&quot;field&quot; id=&quot;style&quot; aria-label=&quot;iReal Pro style&quot;&gt;
-        &lt;optgroup label=&quot;Hear the harmony&quot;&gt;
-          &lt;option&gt;Long Notes&lt;/option&gt;
-        &lt;/optgroup&gt;
-        &lt;optgroup label=&quot;Swing with comping&quot;&gt;
-          &lt;option&gt;Medium Swing&lt;/option&gt;
-          &lt;option&gt;Medium Up Swing&lt;/option&gt;
-          &lt;option&gt;Up Tempo Swing&lt;/option&gt;
-          &lt;option&gt;Ballad&lt;/option&gt;
-        &lt;/optgroup&gt;
-        &lt;optgroup label=&quot;Straight 8th feel with comping&quot;&gt;
-          &lt;option&gt;Bossa Nova&lt;/option&gt;
-          &lt;option&gt;Latin&lt;/option&gt;
-          &lt;option&gt;Even 8ths&lt;/option&gt;
-          &lt;option&gt;Funk&lt;/option&gt;
-        &lt;/optgroup&gt;
-      &lt;/select&gt;
+      &lt;select class=&quot;field&quot; id=&quot;style&quot; aria-label=&quot;iReal Pro style&quot;&gt;&lt;/select&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl&quot;&gt;
       &lt;label class=&quot;cap&quot; for=&quot;tempo&quot;&gt;Tempo (BPM)&lt;/label&gt;
@@ -429,6 +413,25 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10,2] },
     minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
   };
+  /* iReal Pro&#x27;s built-in playback styles (iReal Pro 2026.9), exactly as iReal names them: genre + &quot;-&quot; + name.
+     Grouped here by what you&#x27;re practising. The paid packs (Blues, Brazilian, Salsa) are left out. */
+  const STYLE_GROUPS = [
+    [&quot;Hear the harmony&quot;, [&quot;Jazz-Long Notes&quot;]],
+    [&quot;Swing with comping&quot;, [&quot;Jazz-Slow Swing&quot;, &quot;Jazz-Medium Swing&quot;, &quot;Jazz-Medium Up Swing&quot;, &quot;Jazz-Medium Up Swing 2&quot;,
+      &quot;Jazz-Up Tempo Swing&quot;, &quot;Jazz-Up Tempo Swing 2&quot;, &quot;Jazz-Swing Two/Four&quot;, &quot;Jazz-Blue Note&quot;, &quot;Jazz-Guitar Trio&quot;, &quot;Jazz-Doo Doo Cats&quot;]],
+    [&quot;Ballads&quot;, [&quot;Jazz-Ballad Swing&quot;, &quot;Jazz-Ballad Even&quot;, &quot;Jazz-Ballad Melodic&quot;, &quot;Jazz-Ballad Double Time Feel&quot;]],
+    [&quot;Straight 8th feel with comping&quot;, [&quot;Jazz-Even 8ths&quot;, &quot;Jazz-Even 8ths Open&quot;, &quot;Jazz-Even 16ths&quot;, &quot;Jazz-Bossa Nova&quot;, &quot;Jazz-Latin&quot;, &quot;Jazz-Afro 12/8&quot;]],
+    [&quot;Two feels&quot;, [&quot;Jazz-Bossa/Swing&quot;, &quot;Jazz-Latin/Swing&quot;]],
+    [&quot;Traditional&quot;, [&quot;Jazz-New Orleans Swing&quot;, &quot;Jazz-Second Line&quot;, &quot;Jazz-Trad Jazz&quot;, &quot;Jazz-Gypsy Jazz&quot;]],
+    [&quot;Latin&quot;, [&quot;Latin-Argentina: Tango&quot;, &quot;Latin-Brazil: Bossa Acoustic&quot;, &quot;Latin-Brazil: Bossa Electric&quot;, &quot;Latin-Brazil: Samba&quot;,
+      &quot;Latin-Cuba: Bolero&quot;, &quot;Latin-Cuba: Cha Cha Cha&quot;, &quot;Latin-Cuba: Son Montuno 2&amp;#8211;3&quot;, &quot;Latin-Cuba: Son Montuno 3&amp;#8211;2&quot;]],
+    [&quot;Pop&quot;, [&quot;Pop-Bluegrass&quot;, &quot;Pop-Country&quot;, &quot;Pop-Disco&quot;, &quot;Pop-Funk&quot;, &quot;Pop-Glam Funk&quot;, &quot;Pop-House&quot;, &quot;Pop-Reggae&quot;, &quot;Pop-Rock&quot;,
+      &quot;Pop-Rock 12/8&quot;, &quot;Pop-RnB&quot;, &quot;Pop-Shuffle&quot;, &quot;Pop-Slow Rock&quot;, &quot;Pop-Smooth&quot;, &quot;Pop-Soul&quot;, &quot;Pop-Virtual Funk&quot;]]
+  ];
+  const ALL_STYLES = STYLE_GROUPS.flatMap(g =&gt; g[1]);
+  const styleName = st =&gt; st.replace(/^[^-]+-/, &quot;&quot;);                    // &quot;Jazz-Ballad Even&quot; &amp;#8594; &quot;Ballad Even&quot;
+  // the short name for the chart header and iReal&#x27;s style text (&quot;Latin-Brazil: Samba&quot; &amp;#8594; &quot;Samba&quot;)
+  const styleShort = st =&gt; styleName(st).replace(/^[^:]+:\s*/, &quot;&quot;);
   /* progressions
      q: &quot;choose&quot; (the Major/Minor switch applies), &quot;major&quot; / &quot;minor&quot; (fixed), &quot;none&quot; (no key, just roots)
      bars: per key, long / short (null = as typed); turn: the Bar 4 choice applies;
@@ -454,7 +457,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const DOMS = [&quot;plain&quot;, &quot;ext&quot;, &quot;b9&quot;, &quot;alt&quot;];
   const state = {
     prog: &quot;251&quot;, minor: false, short: false, turn: &quot;hold&quot;, order: &quot;cycle&quot;, start: 0, mix: false,
-    domV: &quot;ext&quot;, domVI: &quot;ext&quot;, reps: 1, style: &quot;Medium Swing&quot;, pdf: &quot;dark&quot;, acc: &quot;flat&quot;,
+    domV: &quot;ext&quot;, domVI: &quot;ext&quot;, reps: 1, style: &quot;Jazz-Medium Swing&quot;, pdf: &quot;dark&quot;, acc: &quot;flat&quot;,
     tempo: 0, chordQ: &quot;^7&quot;, custom: &quot;&quot;, customKey: &quot;auto&quot;, note: &quot;&quot;, hideKeys: false,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
@@ -468,7 +471,12 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (s.start === -1 || (Number.isInteger(s.start) &amp;&amp; s.start &gt;= 0 &amp;&amp; s.start &lt; 12)) state.start = s.start;
     [&quot;domV&quot;,&quot;domVI&quot;].forEach(k =&gt; { if (DOMS.includes(s[k])) state[k] = s[k]; });
     if ([1,2].includes(s.reps)) state.reps = s.reps;
-    if (typeof s.style === &quot;string&quot;) state.style = s.style;
+    if (typeof s.style === &quot;string&quot;) {
+      // older saves used bare names (&quot;Medium Swing&quot;, &quot;Ballad&quot;, &quot;Funk&quot;)
+      const old = { &quot;Ballad&quot;: &quot;Jazz-Ballad Swing&quot;, &quot;Funk&quot;: &quot;Pop-Funk&quot; };
+      const st = ALL_STYLES.includes(s.style) ? s.style : old[s.style] || (&quot;Jazz-&quot; + s.style);
+      if (ALL_STYLES.includes(st)) state.style = st;
+    }
     if (Number.isInteger(s.tempo) &amp;&amp; (s.tempo === 0 || (s.tempo &gt;= 40 &amp;&amp; s.tempo &lt;= 400))) state.tempo = s.tempo;
     if ([&quot;dark&quot;,&quot;light&quot;].includes(s.pdf)) state.pdf = s.pdf;
     if ([&quot;flat&quot;,&quot;sharp&quot;].includes(s.acc)) state.acc = s.acc;
@@ -815,7 +823,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
      block followed by fewer than 2 characters) has its ends swapped. The swap is its own inverse.
      The playback field picks an exact iReal style; empty means &quot;iReal&#x27;s default for the Style name&quot;.
      BPM 0 = iReal&#x27;s default tempo; repeats 0 = iReal&#x27;s default. Instruments live in iReal&#x27;s mixer, not the link. */
-  const PLAYBACK = { &quot;Long Notes&quot;: { style: &quot;Medium Swing&quot;, comp: &quot;Jazz-Long Notes&quot; } };
   function scramble50(s) {
     const n = s.split(&quot;&quot;);
     for (let i = 0; i &lt; 5; i++) { n[49 - i] = s[i]; n[i] = s[49 - i]; }
@@ -832,9 +839,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   function url() {
     const k = ireal(spell(keyFor(order[0], isMinor()), 0, 0)) + (isMinor() ? &quot;-&quot; : &quot;&quot;);
-    const pb = PLAYBACK[state.style] || { style: state.style, comp: &quot;&quot; };
     // iReal Pro shows the composer as &quot;First Last&quot; from &quot;Last First&quot;, so this reads &quot;251 Charts&quot; in the app
-    const fields = [chartTitle(), &quot;Charts 251&quot;, &quot;&quot;, pb.style, k, &quot;&quot;, scramble(music()), pb.comp, String(state.tempo || 0), &quot;0&quot;];
+    const fields = [chartTitle(), &quot;Charts 251&quot;, &quot;&quot;, styleShort(state.style), k, &quot;&quot;, scramble(music()), state.style, String(state.tempo || 0), &quot;0&quot;];
     return &quot;irealb://&quot; + fields.map(encodeURIComponent).join(&quot;=&quot;);
   }
 
@@ -1209,7 +1215,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.textAlign = &quot;center&quot;; c.fillStyle = PDF.ink; c.font = &quot;700 26px &quot; + FLAP;
     c.fillText(chartTitle(), W / 2, M + 22);
     c.textAlign = &quot;left&quot;; c.fillStyle = PDF.dim; c.font = &quot;500 12px &quot; + MONO;
-    c.fillText(&quot;(&quot; + state.style + (state.tempo ? &quot;, &quot; + state.tempo + &quot; bpm&quot; : &quot;&quot;) + &quot;)&quot;, M, M + 42);
+    c.fillText(&quot;(&quot; + styleShort(state.style) + (state.tempo ? &quot;, &quot; + state.tempo + &quot; bpm&quot; : &quot;&quot;) + &quot;)&quot;, M, M + 42);
     c.textAlign = &quot;right&quot;; c.fillText(&quot;251 Charts&quot; + (pages &gt; 1 ? &quot;  &amp;#183;  &quot; + (pageIdx + 1) + &quot;/&quot; + pages : &quot;&quot;), W - M, M + 42);
     c.textAlign = &quot;left&quot;;
     let top = M + 62;
@@ -1260,7 +1266,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = &quot;600 9.5px &quot; + MONO;
     const bars = chartBars().length * (useRepeats() ? 2 : 1);
-    c.fillText((order.length + &quot; keys &amp;#183; &quot; + bars + &quot; bars &amp;#183; &quot; + state.style + (state.tempo ? &quot; &amp;#183; &quot; + state.tempo + &quot; bpm&quot; : &quot;&quot;)).toUpperCase(), M, 42);
+    c.fillText((order.length + &quot; keys &amp;#183; &quot; + bars + &quot; bars &amp;#183; &quot; + styleShort(state.style) + (state.tempo ? &quot; &amp;#183; &quot; + state.tempo + &quot; bpm&quot; : &quot;&quot;)).toUpperCase(), M, 42);
     c.fillStyle = PDF.amber; c.font = &quot;600 11px &quot; + MONO;
     noteLines.forEach((ln, i) =&gt; c.fillText(ln, M, 60 + i * 15));
     drawLines(c, lines, M, top, barW, lineH, S, Math.max(9, S * .42), lines.length - 1, 0);
@@ -1319,6 +1325,8 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     btn.disabled = false;
   };
 
+  $(&quot;style&quot;).innerHTML = STYLE_GROUPS.map(([label, list]) =&gt; &#x27;&lt;optgroup label=&quot;&#x27; + label + &#x27;&quot;&gt;&#x27; +
+    list.map(st =&gt; &#x27;&lt;option value=&quot;&#x27; + st + &#x27;&quot;&gt;&#x27; + styleName(st) + &quot;&lt;/option&gt;&quot;).join(&quot;&quot;) + &quot;&lt;/optgroup&gt;&quot;).join(&quot;&quot;);
   renderChips();
   deal();
   render();
