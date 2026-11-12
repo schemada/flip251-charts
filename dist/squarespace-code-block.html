@@ -439,7 +439,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &quot;1s125&quot;: { name: &quot;I-#I dim-ii-V&quot;,        q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: null },
     &quot;lady&quot;:  { name: &quot;Lady Bird Turnaround&quot;, q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;&amp;#9837;II7&quot;, vi: &quot;&amp;#9837;III7&quot; },
     &quot;one&quot;:   { name: &quot;&quot;,                     q: &quot;none&quot;,   bars: [2, 1], turn: false, v: null,  vi: null },
-    &quot;custom&quot;:{ name: &quot;Custom&quot;,               q: &quot;choose&quot;, bars: null,   turn: false, v: &quot;Dominant&quot;, vi: null }
+    &quot;custom&quot;:{ name: &quot;Custom Progression&quot;,               q: &quot;choose&quot;, bars: null,   turn: false, v: &quot;Dominant&quot;, vi: null }
   };
   /* One chord quality: triads plus the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
      Only qualities iReal Pro can spell and play (it has no min13, so that one is left out). */
@@ -812,7 +812,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   function defaultTitle() {
     const p = P();
     const name = state.prog === &quot;one&quot; ? CHORDQ[state.chordQ] + (/Triads$/.test(CHORDQ[state.chordQ]) ? &quot;&quot; : &quot; Chords&quot;) : p.name;
-    const q = p.q === &quot;choose&quot; ? (isMinor() ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;;
+    const q = p.q === &quot;choose&quot; &amp;&amp; state.prog !== &quot;custom&quot; ? (isMinor() ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;;
     const len = p.bars ? &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) : &quot;&quot;;
     return name + q + len + &quot; (&quot; + ORDERS[state.order].title + &quot;)&quot;;
   }

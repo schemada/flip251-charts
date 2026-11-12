@@ -34,7 +34,7 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   Your own: Custom progression. Quality (Major/Minor) applies to ii–V–I, ii–V, tritone sub and custom; the rest
   are fixed. The One chord drill has no key names (the chord names its root). No colour moves or whole forms (blues, rhythm
   changes) — the owner left those out for now.
-- Custom progression: roman numerals over the key, always counted from the major scale; bars split by "|",
+- Custom progression (default title "Custom Progression (<order>)", no Major/Minor): roman numerals over the key, always counted from the major scale; bars split by "|",
   up to 4 chords a bar, up to 16 bars, "%" repeats a bar. Bare numerals: lowercase –7 (vii ø7), uppercase 7,
   except I and IV maj7. Plain 7ths follow the Dominants setting; any other quality is used as written. Unknown
   tokens are skipped and listed under the box. There are no premade custom examples.

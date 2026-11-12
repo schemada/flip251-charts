@@ -478,7 +478,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     "1s125": { name: "I-#I dim-ii-V",        q: "major",  bars: [4, 2], turn: false, v: "V7",  vi: null },
     "lady":  { name: "Lady Bird Turnaround", q: "major",  bars: [4, 2], turn: false, v: "♭II7", vi: "♭III7" },
     "one":   { name: "",                     q: "none",   bars: [2, 1], turn: false, v: null,  vi: null },
-    "custom":{ name: "Custom",               q: "choose", bars: null,   turn: false, v: "Dominant", vi: null }
+    "custom":{ name: "Custom Progression",               q: "choose", bars: null,   turn: false, v: "Dominant", vi: null }
   };
   /* One chord quality: triads plus the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
      Only qualities iReal Pro can spell and play (it has no min13, so that one is left out). */
@@ -851,7 +851,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
   function defaultTitle() {
     const p = P();
     const name = state.prog === "one" ? CHORDQ[state.chordQ] + (/Triads$/.test(CHORDQ[state.chordQ]) ? "" : " Chords") : p.name;
-    const q = p.q === "choose" ? (isMinor() ? " Minor" : " Major") : "";
+    const q = p.q === "choose" && state.prog !== "custom" ? (isMinor() ? " Minor" : " Major") : "";
     const len = p.bars ? " " + (state.short ? "Short" : "Long") : "";
     return name + q + len + " (" + ORDERS[state.order].title + ")";
   }
