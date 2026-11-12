@@ -35,6 +35,12 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   up to 4 chords a bar, up to 16 bars, "%" repeats a bar. Bare numerals: lowercase –7 (vii ø7), uppercase 7,
   except I and IV maj7. Plain 7ths follow the Dominants setting; any other quality is used as written. Unknown
   tokens are skipped and listed under the box. There are no premade custom examples.
+- Custom also takes plain chord symbols in any key (`D-7 G7 | Cmaj7 | Bmin7b5 E7 | Amin7`; m/min/-, maj7/Δ/^, ø/m7b5,
+  °/dim…), mixed freely with numerals. The app works out the key (scores each key on chords that belong to it and on
+  cadences — V7→I and ii–V — landing on its tonic, the first cadence counting most; major wins a close call; all
+  dominants → the first chord), shows it in a "Written in" menu (Auto · <key>, or pick any of 24) that appears only
+  for chord symbols, and greys Quality to "Quality (from chords)". Chords keep the letter relationships they were typed
+  with. A plain 7 resolving down a 5th to a minor chord gets no natural 13. No slash chords yet (listed as skipped).
 - Bar 4 of long ii–V–I (and its tritone-sub and major/minor variants): hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;
   "Random mix" picks a type per dominant and greys out those two selectors.
 - Order (a menu): Cycle of 4ths (default), Down whole steps, Down half steps, Up minor 3rds, Up major 3rds (Coltrane),

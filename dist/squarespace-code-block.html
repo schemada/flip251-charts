@@ -99,6 +99,9 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .progrow.two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 .custom { display: grid; gap: 6px; width: 100%; justify-self: stretch; }
 .custom .field { font: 600 14px var(--font-label); }
+.keyrow { display: flex; align-items: center; gap: 10px; }
+.keyrow .cap { margin: 0; white-space: nowrap; }
+.keyrow .field { flex: 1; min-width: 0; }
 .help { margin: 0; font: 500 10.5px/1.5 var(--font-label); color: var(--label); }
 .help.warn { color: #9a3412; min-height: 0; }
 .help.warn:empty { display: none; }
@@ -238,8 +241,12 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         &lt;/select&gt;
       &lt;/div&gt;
       &lt;div class=&quot;custom&quot; id=&quot;customRow&quot; hidden&gt;
-        &lt;input class=&quot;field&quot; id=&quot;custom&quot; maxlength=&quot;200&quot; autocomplete=&quot;off&quot; autocapitalize=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;ii-7 V7 | Imaj7 | VI7&quot; aria-describedby=&quot;customHelp&quot;&gt;
-        &lt;p class=&quot;help&quot; id=&quot;customHelp&quot;&gt;Bars split with &lt;b&gt;|&lt;/b&gt;, chords with spaces. Lowercase is minor 7, uppercase is dominant 7 (I and IV are maj7). Add your own quality: &lt;b&gt;ii-7b5 V7b9 i-6&lt;/b&gt;, &lt;b&gt;bVII7&lt;/b&gt;, &lt;b&gt;#iv&amp;#176;&lt;/b&gt;. &lt;b&gt;%&lt;/b&gt; repeats a bar. Plain 7 chords follow the Dominants setting.&lt;/p&gt;
+        &lt;input class=&quot;field&quot; id=&quot;custom&quot; maxlength=&quot;200&quot; autocomplete=&quot;off&quot; autocapitalize=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;D-7 G7 | Cmaj7   or   ii-7 V7 | Imaj7&quot; aria-describedby=&quot;customHelp&quot;&gt;
+        &lt;div class=&quot;keyrow&quot; id=&quot;ckRow&quot; hidden&gt;
+          &lt;label class=&quot;cap&quot; for=&quot;customKey&quot;&gt;Written in&lt;/label&gt;
+          &lt;select class=&quot;field&quot; id=&quot;customKey&quot;&gt;&lt;/select&gt;
+        &lt;/div&gt;
+        &lt;p class=&quot;help&quot; id=&quot;customHelp&quot;&gt;Type chord symbols in any key (&lt;b&gt;D-7 G7 | Cmaj7 | Bmin7b5 E7 | Amin7&lt;/b&gt;) or roman numerals (&lt;b&gt;ii-7 V7 | Imaj7&lt;/b&gt;). Bars split with &lt;b&gt;|&lt;/b&gt;, &lt;b&gt;%&lt;/b&gt; repeats a bar. Bare numerals: lowercase is min7, uppercase is 7 (I and IV are maj7). Plain 7 chords follow the Dominants setting.&lt;/p&gt;
         &lt;p class=&quot;help warn&quot; id=&quot;customErr&quot;&gt;&lt;/p&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -429,7 +436,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   const state = {
     prog: &quot;251&quot;, minor: false, short: false, turn: &quot;hold&quot;, order: &quot;cycle&quot;, start: 0, mix: false,
     domV: &quot;ext&quot;, domVI: &quot;ext&quot;, reps: 1, style: &quot;Medium Swing&quot;, pdf: &quot;dark&quot;, acc: &quot;flat&quot;,
-    chordQ: &quot;^7&quot;, custom: &quot;&quot;, note: &quot;&quot;, hideKeys: false,
+    chordQ: &quot;^7&quot;, custom: &quot;&quot;, customKey: &quot;auto&quot;, note: &quot;&quot;, hideKeys: false,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
   // copy any valid settings from a saved object onto the state (used on load and for saved recipes)
@@ -447,12 +454,13 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if ([&quot;flat&quot;,&quot;sharp&quot;].includes(s.acc)) state.acc = s.acc;
     if (CHORDQ[s.chordQ]) state.chordQ = s.chordQ;
     if (typeof s.custom === &quot;string&quot;) state.custom = s.custom.slice(0, 200);
+    if (typeof s.customKey === &quot;string&quot; &amp;&amp; /^(auto|\d{1,2}[Mm])$/.test(s.customKey)) state.customKey = s.customKey;
     if (typeof s.note === &quot;string&quot;) state.note = s.note.slice(0, 120);
     const ok = a =&gt; Array.isArray(a) &amp;&amp; a.length &amp;&amp; a.every(p =&gt; Number.isInteger(p) &amp;&amp; p &gt;= 0 &amp;&amp; p &lt; 12);
     if (s.sel &amp;&amp; ok(s.sel.major)) state.sel.major = s.sel.major.slice();
     if (s.sel &amp;&amp; ok(s.sel.minor)) state.sel.minor = s.sel.minor.slice();
   }
-  const SAVED = [&quot;prog&quot;,&quot;minor&quot;,&quot;short&quot;,&quot;turn&quot;,&quot;order&quot;,&quot;start&quot;,&quot;mix&quot;,&quot;domV&quot;,&quot;domVI&quot;,&quot;reps&quot;,&quot;style&quot;,&quot;pdf&quot;,&quot;acc&quot;,&quot;chordQ&quot;,&quot;custom&quot;,&quot;note&quot;,&quot;hideKeys&quot;];
+  const SAVED = [&quot;prog&quot;,&quot;minor&quot;,&quot;short&quot;,&quot;turn&quot;,&quot;order&quot;,&quot;start&quot;,&quot;mix&quot;,&quot;domV&quot;,&quot;domVI&quot;,&quot;reps&quot;,&quot;style&quot;,&quot;pdf&quot;,&quot;acc&quot;,&quot;chordQ&quot;,&quot;custom&quot;,&quot;customKey&quot;,&quot;note&quot;,&quot;hideKeys&quot;];
   function snapshot() {
     const o = {}; SAVED.forEach(k =&gt; o[k] = state[k]);
     o.sel = { major: state.sel.major.slice(), minor: state.sel.minor.slice() };
@@ -461,7 +469,9 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   try { applySettings(JSON.parse(localStorage.getItem(&quot;chart251&quot;) || &quot;{}&quot;)); } catch (e) {}
   function save() { try { localStorage.setItem(&quot;chart251&quot;, JSON.stringify(snapshot())); } catch (e) {} }
   const P = () =&gt; PROGS[state.prog];
-  const isMinor = () =&gt; P().q === &quot;minor&quot; || (P().q === &quot;choose&quot; &amp;&amp; state.minor);
+  // typed chord symbols carry their own key (major or minor); otherwise the Quality switch decides
+  const symKey = () =&gt; state.prog === &quot;custom&quot; &amp;&amp; customParsed &amp;&amp; customParsed.key;
+  const isMinor = () =&gt; symKey() ? customParsed.key.minor : P().q === &quot;minor&quot; || (P().q === &quot;choose&quot; &amp;&amp; state.minor);
   const Q = () =&gt; isMinor() ? &quot;minor&quot; : &quot;major&quot;;
   const sel = () =&gt; state.sel[Q()];
 
@@ -510,36 +520,96 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &quot;sus&quot;: &quot;7sus&quot;, &quot;sus4&quot;: &quot;7sus&quot;, &quot;7sus&quot;: &quot;7sus&quot;, &quot;7sus4&quot;: &quot;7sus&quot;, &quot;9sus&quot;: &quot;9sus&quot;, &quot;9sus4&quot;: &quot;9sus&quot;, &quot;13sus&quot;: &quot;13sus&quot;,
     &quot;7b9sus&quot;: &quot;7b9sus&quot;, &quot;13b9&quot;: &quot;13b9&quot;, &quot;13#11&quot;: &quot;13#11&quot;, &quot;9#11&quot;: &quot;9#11&quot;, &quot;7b9b13&quot;: &quot;7b9b13&quot;, &quot;7#9b13&quot;: &quot;7b13&quot;
   };
+  // a written quality in iReal Pro&#x27;s spelling (&quot;&quot; stays &quot;&quot;: a plain triad); null if it can&#x27;t be read
+  function mapQual(q) {
+    if (q === &quot;&quot;) return &quot;&quot;;
+    if (QALIAS[q] !== undefined) return QALIAS[q];
+    if (QALIAS[q.toLowerCase()] !== undefined &amp;&amp; !/^M/.test(q)) return QALIAS[q.toLowerCase()];
+    if (/^min/.test(q) &amp;&amp; QALIAS[&quot;m&quot; + q.slice(3)] !== undefined) return QALIAS[&quot;m&quot; + q.slice(3)];
+    return /^[\w#^+\-]+$/.test(q) ? q : null;
+  }
+  const qClass = q =&gt; q === &quot;&quot; || /^(\^|6|69)/.test(q) ? &quot;maj&quot; : q[0] === &quot;-&quot; ? &quot;min&quot; : q[0] === &quot;h&quot; ? &quot;hdim&quot; : q[0] === &quot;o&quot; ? &quot;dim&quot; : &quot;dom&quot;;
+  // Which key are typed chord symbols in? Each key is scored: chords that belong to it, cadences that land on its
+  // tonic (V7 &amp;#8594; I, and ii&amp;#8211;V pointing at it), the first cadence counting extra, and the first / last chord being its
+  // tonic. Major wins a close call. All-dominant input is named after its first chord. &quot;Written in&quot; can override.
+  const DEG = { major: { 0:&quot;maj&quot;, 2:&quot;min&quot;, 4:&quot;min&quot;, 5:&quot;maj&quot;, 7:&quot;dom&quot;, 9:&quot;min&quot;, 11:&quot;hdim&quot; },
+                minor: { 0:&quot;min&quot;, 2:&quot;hdim&quot;, 3:&quot;maj&quot;, 5:&quot;min&quot;, 7:&quot;dom&quot;, 8:&quot;maj&quot;, 10:&quot;dom&quot;, 11:&quot;dim&quot; } };
+  function detectKey(chs) {
+    if (chs.every(c =&gt; c.cls === &quot;dom&quot;)) return { pc: chs[0].pc, minor: false };
+    const cad = [];                                     // cadence targets in the order they happen
+    for (let i = 0; i &lt; chs.length - 1; i++) {
+      const a = chs[i], b = chs[i + 1];
+      if (a.cls === &quot;dom&quot; &amp;&amp; (a.pc + 5) % 12 === b.pc &amp;&amp; (b.cls === &quot;maj&quot; || b.cls === &quot;min&quot;)) cad.push({ pc: b.pc, minor: b.cls === &quot;min&quot; });
+      else if ((a.cls === &quot;min&quot; || a.cls === &quot;hdim&quot;) &amp;&amp; b.cls === &quot;dom&quot; &amp;&amp; (a.pc + 5) % 12 === b.pc) cad.push({ pc: (b.pc + 5) % 12, minor: a.cls === &quot;hdim&quot; });
+    }
+    let best = null, bestScore = -Infinity;
+    const tonics = [...new Set(chs.map(c =&gt; c.pc).concat([...Array(12).keys()]))];
+    tonics.forEach(t =&gt; [false, true].forEach(minor =&gt; {
+      const deg = DEG[minor ? &quot;minor&quot; : &quot;major&quot;], home = minor ? &quot;min&quot; : &quot;maj&quot;;
+      let sc = minor ? -.3 : 0;
+      chs.forEach(c =&gt; { const want = deg[(c.pc - t + 12) % 12]; if (want) sc += want === c.cls ? 1 : .4; });
+      cad.forEach((c, i) =&gt; { if (c.pc === t &amp;&amp; c.minor === minor) sc += i === 0 ? 3 : 2; });
+      if (chs[0].pc === t &amp;&amp; chs[0].cls === home) sc += 1;
+      if (chs[chs.length - 1].pc === t &amp;&amp; chs[chs.length - 1].cls === home) sc += .6;
+      if (sc &gt; bestScore + 1e-9) { bestScore = sc; best = { pc: t, minor }; }
+    }));
+    return best;
+  }
+  let autoName = &quot;&quot;;
+  const accOf = (li, pc) =&gt; { let a = ((pc - NAT[li]) % 12 + 12) % 12; return a &gt; 6 ? a - 12 : a; };
   function parseCustom(text) {
     const src = (text || &quot;&quot;).trim() || &quot;ii-7 V7 | Imaj7&quot;;
-    const bars = [], bad = [];
+    const bars = [], bad = [], abs = [];
     src.replace(/[\n,;]+/g, &quot; &quot;).split(&quot;|&quot;).forEach(seg =&gt; {
       const toks = seg.trim().split(/\s+/).filter(Boolean);
       if (!toks.length) return;
       const bar = [];
       toks.forEach(t =&gt; {
         if (/^(%|x|\/)$/i.test(t) &amp;&amp; !bar.length) { bar.push({ rep: true }); return; }
-        const m = t.normalize(&quot;NFC&quot;).replace(/&amp;#9837;/g, &quot;b&quot;).replace(/&amp;#9839;/g, &quot;#&quot;).replace(/&amp;#8211;/g, &quot;-&quot;)
-                   .match(/^([b#]?)(vii|vi|v|iv|iii|ii|i)(.*)$/i);
-        if (!m || bar.some(c =&gt; c.rep)) { bad.push(t); return; }
+        if (bar.some(c =&gt; c.rep)) { bad.push(t); return; }
+        const n = t.normalize(&quot;NFC&quot;).replace(/&amp;#9837;/g, &quot;b&quot;).replace(/&amp;#9839;/g, &quot;#&quot;).replace(/&amp;#8211;/g, &quot;-&quot;);
+        // a chord symbol (D-7, Cmaj7, Bbm7b5&amp;#8230;): kept as letters for now, placed in the key once it&#x27;s known
+        const cm = n.match(/^([A-G])([b#]?)(.*)$/);
+        if (cm) {
+          const qual = mapQual(cm[3]);
+          if (qual === null || /\//.test(cm[3])) { bad.push(/\//.test(cm[3]) ? t + &quot; (no slash chords yet)&quot; : t); return; }
+          const li = LETTERS.indexOf(cm[1]), pc = (NAT[li] + (cm[2] === &quot;b&quot; ? 11 : cm[2] === &quot;#&quot; ? 1 : 0)) % 12;
+          const c = { li, pc, qual, dom: qual === &quot;7&quot;, cls: qClass(qual) };
+          abs.push(c); bar.push(c); return;
+        }
+        // a roman numeral (ii-7, V7b9, bVII7&amp;#8230;)
+        const m = n.match(/^([b#]?)(vii|vi|v|iv|iii|ii|i)(.*)$/i);
+        if (!m || /[A-Z]/.test(m[1])) { bad.push(t); return; }
         const num = m[2], low = num === num.toLowerCase(), up = num === num.toUpperCase();
         if (!low &amp;&amp; !up) { bad.push(t); return; }
         const [steps, semis] = NUMERALS[num.toLowerCase()];
-        let qual = m[3], dom = false;
-        if (!qual) {
-          const n = num.toLowerCase();
-          qual = low ? (n === &quot;vii&quot; ? &quot;h7&quot; : &quot;-7&quot;) : (n === &quot;i&quot; || n === &quot;iv&quot; ? &quot;^7&quot; : &quot;7&quot;);
-        } else if (QALIAS[qual] !== undefined) qual = QALIAS[qual];
-        else if (QALIAS[qual.toLowerCase()] !== undefined &amp;&amp; !/^M/.test(qual)) qual = QALIAS[qual.toLowerCase()];
-        else if (!/^[\w#^+\-]+$/.test(qual)) { bad.push(t); return; }
-        if (qual === &quot;7&quot;) dom = true;                       // plain 7ths follow the Dominants setting
-        bar.push({ steps, semis: semis + (m[1] === &quot;b&quot; ? -1 : m[1] === &quot;#&quot; ? 1 : 0), qual, dom });
+        let qual;
+        if (!m[3]) {
+          const k = num.toLowerCase();
+          qual = low ? (k === &quot;vii&quot; ? &quot;h7&quot; : &quot;-7&quot;) : (k === &quot;i&quot; || k === &quot;iv&quot; ? &quot;^7&quot; : &quot;7&quot;);
+        } else if ((qual = mapQual(m[3])) === null) { bad.push(t); return; }
+        bar.push({ steps, semis: semis + (m[1] === &quot;b&quot; ? -1 : m[1] === &quot;#&quot; ? 1 : 0), qual, dom: qual === &quot;7&quot; });  // plain 7ths follow the Dominants setting
       });
-      if (bar.length &gt; 4) { bad.push(...bar.slice(4).map(() =&gt; &quot;(more than 4 chords in a bar)&quot;)); bar.length = 4; }
+      if (bar.length &gt; 4) { bad.push(&quot;(more than 4 chords in a bar)&quot;); bar.length = 4; }
       if (bar.length) bars.push(bar);
     });
     if (bars.length &amp;&amp; bars[0][0].rep) bars.shift();
-    return { bars: bars.slice(0, 16), bad: [...new Set(bad)] };
+    let key = null;
+    if (abs.length) {
+      // the key: chosen in &quot;Written in&quot;, or worked out from the chords
+      const ov = /^(\d{1,2})([Mm])$/.exec(state.customKey || &quot;&quot;);
+      const nameOf = f =&gt; { const c = abs.find(x =&gt; x.pc === f.pc), l = c ? c.li : keyFor(f.pc, f.minor)[0];
+                            return spell([l, accOf(l, f.pc)], 0, 0) + (f.minor ? &quot; minor&quot; : &quot; major&quot;); };
+      const det = detectKey(abs);
+      autoName = nameOf(det);
+      const found = ov ? { pc: +ov[1] % 12, minor: ov[2] === &quot;m&quot; } : det;
+      const same = abs.find(c =&gt; c.pc === found.pc);
+      const li = same ? same.li : keyFor(found.pc, found.minor)[0];
+      key = { pc: found.pc, minor: found.minor, auto: !ov, name: spell([li, accOf(li, found.pc)], 0, 0) + (found.minor ? &quot; minor&quot; : &quot; major&quot;) };
+      // each chord as steps/semitones above that key, keeping the letter relationship it was written with
+      abs.forEach(c =&gt; { c.steps = (c.li - li + 7) % 7; c.semis = (c.pc - found.pc + 12) % 12; });
+    }
+    return { bars: bars.slice(0, 16), bad: [...new Set(bad)], key };
   }
   let customParsed = parseCustom(state.custom);
 
@@ -600,8 +670,13 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         const ch = r(0, 0) + state.chordQ;
         return long ? [[ch], [&quot;x&quot;]] : [[ch]];
       }
-      case &quot;custom&quot;:
-        return customParsed.bars.map(bar =&gt; bar.map(c =&gt; c.rep ? &quot;x&quot; : r(c.steps, c.semis) + (c.dom ? dq(&quot;v&quot;, minor) : c.qual)));
+      case &quot;custom&quot;: {
+        // a plain dominant that resolves down a 5th to a minor chord is treated as minor (no natural 13)
+        const flat = customParsed.bars.flat().filter(c =&gt; !c.rep);
+        const toMinor = c =&gt; { const nx = flat[flat.indexOf(c) + 1];
+          return !!nx &amp;&amp; ((nx.semis - c.semis) % 12 + 12) % 12 === 5 &amp;&amp; /^(min|hdim)$/.test(qClass(nx.qual)); };
+        return customParsed.bars.map(bar =&gt; bar.map(c =&gt; c.rep ? &quot;x&quot; : r(c.steps, c.semis) + (c.dom ? dq(&quot;v&quot;, minor || toMinor(c)) : c.qual)));
+      }
       default: {
         const V = r(4, 7) + dq(&quot;v&quot;, minor);
         return twoFiveOne(ii, V, I, minor);
@@ -629,8 +704,9 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     }
     return path;
   }
+  let dealtQ = &quot;major&quot;;
   function deal() {
-    const s = sel();
+    const s = sel(); dealtQ = Q();
     if (state.order === &quot;random&quot;) order = shuffle(s.slice());
     else order = walk(firstKey(), ORDERS[state.order].step).filter(pc =&gt; s.includes(pc));
     rollMix();
@@ -772,10 +848,18 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (state.prog === &quot;custom&quot;) {
       if (document.activeElement !== $(&quot;custom&quot;)) $(&quot;custom&quot;).value = state.custom;
       $(&quot;customErr&quot;).textContent = customParsed.bad.length ? &quot;Skipped: &quot; + customParsed.bad.join(&quot;  &quot;) : &quot;&quot;;
+      const k = customParsed.key;
+      $(&quot;ckRow&quot;).hidden = !k;
+      if (k) {
+        $(&quot;customKey&quot;).innerHTML = &#x27;&lt;option value=&quot;auto&quot;&gt;Auto &amp;#183; &#x27; + autoName + &quot;&lt;/option&gt;&quot; +
+          [&quot;M&quot;, &quot;m&quot;].map(mm =&gt; BY_FOURTHS.map(pc =&gt; &#x27;&lt;option value=&quot;&#x27; + pc + mm + &#x27;&quot;&gt;&#x27; +
+            spell(keyFor(pc, mm === &quot;m&quot;), 0, 0) + (mm === &quot;m&quot; ? &quot; minor&quot; : &quot; major&quot;) + &quot;&lt;/option&gt;&quot;).join(&quot;&quot;)).join(&quot;&quot;);
+        $(&quot;customKey&quot;).value = state.customKey;
+      }
     }
     press(&quot;q-major&quot;, !isMinor()); press(&quot;q-minor&quot;, isMinor());
-    $(&quot;qCtl&quot;).classList.toggle(&quot;off&quot;, q !== &quot;choose&quot;);
-    $(&quot;qCap&quot;).textContent = q === &quot;choose&quot; ? &quot;Quality&quot; : q === &quot;major&quot; ? &quot;Quality (major only)&quot; : q === &quot;minor&quot; ? &quot;Quality (minor only)&quot; : &quot;Quality&quot;;
+    $(&quot;qCtl&quot;).classList.toggle(&quot;off&quot;, q !== &quot;choose&quot; || !!symKey());
+    $(&quot;qCap&quot;).textContent = symKey() ? &quot;Quality (from chords)&quot; : q === &quot;choose&quot; ? &quot;Quality&quot; : q === &quot;major&quot; ? &quot;Quality (major only)&quot; : q === &quot;minor&quot; ? &quot;Quality (minor only)&quot; : &quot;Quality&quot;;
     press(&quot;l-long&quot;, !state.short); press(&quot;l-short&quot;, state.short);
     $(&quot;lenCtl&quot;).classList.toggle(&quot;off&quot;, !n);
     $(&quot;l-long&quot;).textContent = n ? &quot;Long &amp;#183; &quot; + n[0] : &quot;Long&quot;;
@@ -809,7 +893,10 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   let ct = 0;
   $(&quot;custom&quot;).oninput = e =&gt; {
     state.custom = e.target.value; customParsed = parseCustom(state.custom);
-    clearTimeout(ct); ct = setTimeout(() =&gt; changed(false), 120);
+    clearTimeout(ct); ct = setTimeout(() =&gt; changed(Q() !== dealtQ), 120);
+  };
+  $(&quot;customKey&quot;).onchange = e =&gt; {
+    const was = Q(); state.customKey = e.target.value; customParsed = parseCustom(state.custom); changed(Q() !== was);
   };
   $(&quot;q-major&quot;).onclick = () =&gt; { state.minor = false; changed(true); };
   $(&quot;q-minor&quot;).onclick = () =&gt; { state.minor = true; changed(true); };
