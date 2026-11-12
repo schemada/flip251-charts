@@ -44,12 +44,13 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   the root; iReal `C^7/G`; drawn as a smaller "/G" on the baseline). With numerals, `V7/ii` is an applied chord (V7 of ii).
 - Bar 4 of long ii–V–I (and its tritone-sub and major/minor variants): hold I (bar-repeat `%`, iReal `x`) or VI7 (V7/ii). V7 and VI7 sounds are chosen separately;
   "Random mix" picks a type per dominant and greys out those two selectors.
-- Order (a menu): Cycle of 4ths (default), Down whole steps, Down half steps, Up minor 3rds, Up major 3rds (Coltrane),
-  Shuffled. All but Shuffled walk from "Start on" (greyed out, not hidden, for Shuffled). When a walk closes up before
-  12 keys (whole steps, 3rds) it slips a half step in the same direction to the next unused key and continues, so
-  every key appears once. "Shuffle again" picks a new start key (or a new random order for Shuffled). Default title
-  ends with "(Cycle)", "(Whole Steps)", "(Half Steps)", "(Minor 3rds)", "(Major 3rds)" or "(Shuffled)" — never
-  "Shuffle" (sounds like a groove).
+- Order (a menu, in this order): Cycle of 4ths (default), Cycle of 5ths, Up / Down half steps, Up / Down whole steps,
+  Up / Down minor 3rds, Up / Down major 3rds, Tritones, Shuffled — every interval both ways (nothing past a 5th: the
+  rest are inversions). All but Shuffled walk from "Start on" (greyed out, not hidden, for Shuffled). When a walk
+  closes up before 12 keys (whole steps, 3rds, tritones) it slips a half step in the same direction to the next unused
+  key and continues, so every key appears once. "Shuffle again" picks a new start key (or a new random order for
+  Shuffled). Default title ends with the order, e.g. "(Cycle)", "(Cycle of 5ths)", "(Down Whole Steps)", "(Tritones)",
+  "(Shuffled)" — never "Shuffle" (sounds like a groove).
 
 - Surprise me: random progression (not Custom), quality, length, bar 4, order, start, dominants; keeps keys,
   repeats, style, look, key names and the teaching note. No saved recipes (tried and removed: the settings are quick

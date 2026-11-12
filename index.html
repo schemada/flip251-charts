@@ -309,10 +309,16 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
       <label class="cap" for="order">Order</label>
       <select class="field" id="order" aria-label="Order of keys">
         <option value="cycle">Cycle of 4ths</option>
-        <option value="wd">Down whole steps</option>
+        <option value="c5">Cycle of 5ths</option>
+        <option value="hu">Up half steps</option>
         <option value="hd">Down half steps</option>
+        <option value="wu">Up whole steps</option>
+        <option value="wd">Down whole steps</option>
         <option value="m3">Up minor 3rds</option>
+        <option value="m3d">Down minor 3rds</option>
         <option value="M3">Up major 3rds</option>
+        <option value="M3d">Down major 3rds</option>
+        <option value="tt">Tritones</option>
         <option value="random">Shuffled</option>
       </select>
     </div>
@@ -432,13 +438,20 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
   const BY_FOURTHS = [0,5,10,3,8,1,6,11,4,9,2,7];
   const MAJ = { 0:[0,0], 1:[1,-1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[4,-1], 7:[4,0], 8:[5,-1], 9:[5,0], 10:[6,-1], 11:[6,0] };
   const MIN = { 0:[0,0], 1:[0,1], 2:[1,0], 3:[2,-1], 4:[2,0], 5:[3,0], 6:[3,1], 7:[4,0], 8:[4,1], 9:[5,0], 10:[6,-1], 11:[6,0] };
+  // step = semitones from one key to the next (keys kept from older versions: wd, hd, m3, M3)
   const ORDERS = {
-    cycle:  { step: 5,  title: "Cycle",        note: "cycle of 4ths" },
-    wd:     { step: -2, title: "Whole Steps",  note: "down whole steps" },
-    hd:     { step: -1, title: "Half Steps",   note: "down half steps" },
-    m3:     { step: 3,  title: "Minor 3rds",   note: "up minor 3rds" },
-    M3:     { step: 4,  title: "Major 3rds",   note: "up major 3rds" },
-    random: { step: 0,  title: "Shuffled",     note: "shuffled" }
+    cycle:  { step: 5,  title: "Cycle",            note: "cycle of 4ths" },
+    c5:     { step: 7,  title: "Cycle of 5ths",    note: "cycle of 5ths" },
+    hu:     { step: 1,  title: "Up Half Steps",    note: "up half steps" },
+    hd:     { step: -1, title: "Down Half Steps",  note: "down half steps" },
+    wu:     { step: 2,  title: "Up Whole Steps",   note: "up whole steps" },
+    wd:     { step: -2, title: "Down Whole Steps", note: "down whole steps" },
+    m3:     { step: 3,  title: "Up Minor 3rds",    note: "up minor 3rds" },
+    m3d:    { step: -3, title: "Down Minor 3rds",  note: "down minor 3rds" },
+    M3:     { step: 4,  title: "Up Major 3rds",    note: "up major 3rds" },
+    M3d:    { step: -4, title: "Down Major 3rds",  note: "down major 3rds" },
+    tt:     { step: 6,  title: "Tritones",         note: "by tritones" },
+    random: { step: 0,  title: "Shuffled",         note: "shuffled" }
   };
   const PRESETS = {
     major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10,2] },
