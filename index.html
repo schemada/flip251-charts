@@ -679,10 +679,20 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
 
   /* ---------- the chart as lines of 4 bars ---------- */
   // every key's bars in order, flagged with where each key starts and ends; 4 bars to a line, like iReal Pro
+  // "Twice": when the whole chart still fits on one page (12 lines) written out twice, each key is simply written
+  // out a second time; only longer charts use repeat signs. The preview, PDF and iReal Pro all follow this.
+  const MAX_LINES = 12;
+  function writtenOut() {
+    if (state.reps !== 2) return false;
+    const n = order.reduce((t, pc, k) => t + barsFor(pc, k).length, 0);
+    return Math.ceil(n * 2 / 4) <= MAX_LINES;
+  }
+  const useRepeats = () => state.reps === 2 && !writtenOut();
   function chartBars() {
-    const out = [];
+    const out = [], twice = writtenOut();
     order.forEach((pc, k) => {
-      barsFor(pc, k).forEach((chords, j, all) => out.push({ chords, label: j === 0 && !state.hideKeys ? keyName(pc) : "", segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
+      const one = barsFor(pc, k), all = twice ? one.concat(one) : one;
+      all.forEach((chords, j) => out.push({ chords, label: j === 0 && !state.hideKeys ? keyName(pc) : "", segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
     });
     return out;
   }
@@ -710,9 +720,11 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
   }
   const noteText = () => state.note.trim().replace(/[<>=|]/g, " ").replace(/\s+/g, " ");
   function music() {
-    const open = state.reps === 2 ? "{" : "[", close = state.reps === 2 ? "}" : "]";
+    const rpt = useRepeats(), twice = writtenOut();
+    const open = rpt ? "{" : "[", close = rpt ? "}" : "]";
     return order.map((pc, k) => {
-      const body = barsFor(pc, k).map((b, i) => {
+      const one = barsFor(pc, k);
+      const body = (twice ? one.concat(one) : one).map((b, i) => {
         const notes = ["", "", "", ""];
         if (i === 0 && !state.hideKeys && keyName(pc)) notes[0] = keyName(pc);
         // the teaching note goes at the top of the first bar (*72 lifts a comment above the chords in iReal Pro)
@@ -720,7 +732,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
         return cell(b, notes);
       }).join("|");
       const last = k === order.length - 1;
-      return open + (k === 0 ? "T44" : "") + body + (last && state.reps === 1 ? "Z" : close);
+      return open + (k === 0 ? "T44" : "") + body + (last && !rpt ? "Z" : close);
     }).join("");
   }
   function defaultTitle() {
@@ -1085,16 +1097,17 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
   }
   // the rows of bars, shared by the PDF page and the on-screen chart image
   function drawLines(c, lines, x0, top, barW, lineH, S, labelSize, lastIdx, firstIdx) {
+    const rpt = useRepeats();
     const s = Math.max(.6, S / 34);
     lines.forEach((line, i) => {
       const y0 = top + i * lineH, yBase = y0 + S * 1.05, yBar0 = y0 + 2, yBar1 = y0 + S * 1.3;
       const globalLast = firstIdx + i === lastIdx;
       line.forEach((b, j) => {
         const x = x0 + j * barW;
-        drawBarline(c, x, yBar0, yBar1, b.segStart ? (state.reps === 2 ? (j > 0 ? "repBoth" : "repOpen") : "double") : "single", s);
+        drawBarline(c, x, yBar0, yBar1, b.segStart ? (rpt ? (j > 0 ? "repBoth" : "repOpen") : "double") : "single", s);
         const n = b.chords.length;
         // each chord gets an equal share of the bar; a long symbol shrinks to fit its share so nothing touches a barline
-        const pad = (b.segStart && state.reps === 2 ? 15 : 8) * s / .9, slot = (barW - pad - 12 * s) / n;
+        const pad = (b.segStart && rpt ? 15 : 8) * s / .9, slot = (barW - pad - 12 * s) / n;
         b.chords.forEach((tok, k) => {
           const w = drawChord(c, tok, 0, 0, S, true), size = w > slot - 6 * s ? S * (slot - 6 * s) / w : S;
           drawChord(c, tok, x + pad + k * (barW - pad) / n, yBase, size);
@@ -1102,7 +1115,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
         if (b.label) drawLabel(c, b.label, x + 8 * s / .9, yBar1 + labelSize * 1.15, labelSize);
       });
       const xEnd = x0 + line.length * barW, lastBar = line[line.length - 1];
-      drawBarline(c, xEnd, yBar0, yBar1, globalLast && state.reps === 1 ? "final" : state.reps === 2 && lastBar.segEnd ? "repClose" : lastBar.segEnd ? "double" : "single", s);
+      drawBarline(c, xEnd, yBar0, yBar1, globalLast && !rpt ? "final" : rpt && lastBar.segEnd ? "repClose" : lastBar.segEnd ? "double" : "single", s);
     });
   }
   // a whole PDF page; scale = canvas pixels per PDF point
@@ -1167,7 +1180,7 @@ body { padding-top: max(28px, calc(env(safe-area-inset-top, 0px) + 14px)); paddi
     while (c.measureText(title).width > cssW - 2 * M && title.length > 4) title = title.slice(0, -2) + "…";
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = "600 9.5px " + MONO;
-    const bars = chartBars().length * state.reps;
+    const bars = chartBars().length * (useRepeats() ? 2 : 1);
     c.fillText((order.length + " keys · " + bars + " bars · " + state.style).toUpperCase(), M, 42);
     c.fillStyle = PDF.amber; c.font = "600 11px " + MONO;
     noteLines.forEach((ln, i) => c.fillText(ln, M, 60 + i * 15));

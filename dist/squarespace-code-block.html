@@ -640,10 +640,20 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
 
   /* ---------- the chart as lines of 4 bars ---------- */
   // every key&#x27;s bars in order, flagged with where each key starts and ends; 4 bars to a line, like iReal Pro
+  // &quot;Twice&quot;: when the whole chart still fits on one page (12 lines) written out twice, each key is simply written
+  // out a second time; only longer charts use repeat signs. The preview, PDF and iReal Pro all follow this.
+  const MAX_LINES = 12;
+  function writtenOut() {
+    if (state.reps !== 2) return false;
+    const n = order.reduce((t, pc, k) =&gt; t + barsFor(pc, k).length, 0);
+    return Math.ceil(n * 2 / 4) &lt;= MAX_LINES;
+  }
+  const useRepeats = () =&gt; state.reps === 2 &amp;&amp; !writtenOut();
   function chartBars() {
-    const out = [];
+    const out = [], twice = writtenOut();
     order.forEach((pc, k) =&gt; {
-      barsFor(pc, k).forEach((chords, j, all) =&gt; out.push({ chords, label: j === 0 &amp;&amp; !state.hideKeys ? keyName(pc) : &quot;&quot;, segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
+      const one = barsFor(pc, k), all = twice ? one.concat(one) : one;
+      all.forEach((chords, j) =&gt; out.push({ chords, label: j === 0 &amp;&amp; !state.hideKeys ? keyName(pc) : &quot;&quot;, segStart: j === 0, segEnd: j === all.length - 1, keyIdx: k }));
     });
     return out;
   }
@@ -671,9 +681,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   const noteText = () =&gt; state.note.trim().replace(/[&lt;&gt;=|]/g, &quot; &quot;).replace(/\s+/g, &quot; &quot;);
   function music() {
-    const open = state.reps === 2 ? &quot;{&quot; : &quot;[&quot;, close = state.reps === 2 ? &quot;}&quot; : &quot;]&quot;;
+    const rpt = useRepeats(), twice = writtenOut();
+    const open = rpt ? &quot;{&quot; : &quot;[&quot;, close = rpt ? &quot;}&quot; : &quot;]&quot;;
     return order.map((pc, k) =&gt; {
-      const body = barsFor(pc, k).map((b, i) =&gt; {
+      const one = barsFor(pc, k);
+      const body = (twice ? one.concat(one) : one).map((b, i) =&gt; {
         const notes = [&quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;];
         if (i === 0 &amp;&amp; !state.hideKeys &amp;&amp; keyName(pc)) notes[0] = keyName(pc);
         // the teaching note goes at the top of the first bar (*72 lifts a comment above the chords in iReal Pro)
@@ -681,7 +693,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         return cell(b, notes);
       }).join(&quot;|&quot;);
       const last = k === order.length - 1;
-      return open + (k === 0 ? &quot;T44&quot; : &quot;&quot;) + body + (last &amp;&amp; state.reps === 1 ? &quot;Z&quot; : close);
+      return open + (k === 0 ? &quot;T44&quot; : &quot;&quot;) + body + (last &amp;&amp; !rpt ? &quot;Z&quot; : close);
     }).join(&quot;&quot;);
   }
   function defaultTitle() {
@@ -1046,16 +1058,17 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   // the rows of bars, shared by the PDF page and the on-screen chart image
   function drawLines(c, lines, x0, top, barW, lineH, S, labelSize, lastIdx, firstIdx) {
+    const rpt = useRepeats();
     const s = Math.max(.6, S / 34);
     lines.forEach((line, i) =&gt; {
       const y0 = top + i * lineH, yBase = y0 + S * 1.05, yBar0 = y0 + 2, yBar1 = y0 + S * 1.3;
       const globalLast = firstIdx + i === lastIdx;
       line.forEach((b, j) =&gt; {
         const x = x0 + j * barW;
-        drawBarline(c, x, yBar0, yBar1, b.segStart ? (state.reps === 2 ? (j &gt; 0 ? &quot;repBoth&quot; : &quot;repOpen&quot;) : &quot;double&quot;) : &quot;single&quot;, s);
+        drawBarline(c, x, yBar0, yBar1, b.segStart ? (rpt ? (j &gt; 0 ? &quot;repBoth&quot; : &quot;repOpen&quot;) : &quot;double&quot;) : &quot;single&quot;, s);
         const n = b.chords.length;
         // each chord gets an equal share of the bar; a long symbol shrinks to fit its share so nothing touches a barline
-        const pad = (b.segStart &amp;&amp; state.reps === 2 ? 15 : 8) * s / .9, slot = (barW - pad - 12 * s) / n;
+        const pad = (b.segStart &amp;&amp; rpt ? 15 : 8) * s / .9, slot = (barW - pad - 12 * s) / n;
         b.chords.forEach((tok, k) =&gt; {
           const w = drawChord(c, tok, 0, 0, S, true), size = w &gt; slot - 6 * s ? S * (slot - 6 * s) / w : S;
           drawChord(c, tok, x + pad + k * (barW - pad) / n, yBase, size);
@@ -1063,7 +1076,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
         if (b.label) drawLabel(c, b.label, x + 8 * s / .9, yBar1 + labelSize * 1.15, labelSize);
       });
       const xEnd = x0 + line.length * barW, lastBar = line[line.length - 1];
-      drawBarline(c, xEnd, yBar0, yBar1, globalLast &amp;&amp; state.reps === 1 ? &quot;final&quot; : state.reps === 2 &amp;&amp; lastBar.segEnd ? &quot;repClose&quot; : lastBar.segEnd ? &quot;double&quot; : &quot;single&quot;, s);
+      drawBarline(c, xEnd, yBar0, yBar1, globalLast &amp;&amp; !rpt ? &quot;final&quot; : rpt &amp;&amp; lastBar.segEnd ? &quot;repClose&quot; : lastBar.segEnd ? &quot;double&quot; : &quot;single&quot;, s);
     });
   }
   // a whole PDF page; scale = canvas pixels per PDF point
@@ -1128,7 +1141,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     while (c.measureText(title).width &gt; cssW - 2 * M &amp;&amp; title.length &gt; 4) title = title.slice(0, -2) + &quot;&amp;#8230;&quot;;
     c.fillText(title, M, 24);
     c.fillStyle = PDF.dim; c.font = &quot;600 9.5px &quot; + MONO;
-    const bars = chartBars().length * state.reps;
+    const bars = chartBars().length * (useRepeats() ? 2 : 1);
     c.fillText((order.length + &quot; keys &amp;#183; &quot; + bars + &quot; bars &amp;#183; &quot; + state.style).toUpperCase(), M, 42);
     c.fillStyle = PDF.amber; c.font = &quot;600 11px &quot; + MONO;
     noteLines.forEach((ln, i) =&gt; c.fillText(ln, M, 60 + i * 15));

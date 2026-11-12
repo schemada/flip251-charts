@@ -50,8 +50,10 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
 
 **Chart / PDF**
 - Four bars per line; each key's name sits **under its first bar** (iReal style), never in a side column.
+- "Twice": if the chart written out twice fits on one page (12 lines of 4 bars), each key is simply written out a
+  second time (no repeat signs) — in the preview, the PDF and iReal alike. Only longer charts use repeats.
 - Barlines: single for every measure (same ink as doubles, just thinner), double at each key change, repeat signs when
-  "Twice" (`{ }` in iReal) including `:‖:` where two keys meet mid-line, thin-thick final bar.
+  "Twice" needs them (`{ }` in iReal) including `:‖:` where two keys meet mid-line, thin-thick final bar.
 - Key names: Show / Hide switch (hides them in the preview, PDF and iReal).
 - Teaching note (optional, 120 chars): shown under the header in the preview and PDF, and in iReal as a comment
   `<*72…>` on the first bar. Just a free-text box — no premade prompts.
