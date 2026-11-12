@@ -52,8 +52,9 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   "Shuffle" (sounds like a groove).
 
 - Surprise me: random progression (not Custom), quality, length, bar 4, order, start, dominants; keeps keys,
-  repeats, style, look, key names and the teaching note. Saved recipes: the whole setup (plus the title) stored on
-  the device under the chart title; picking one reloads it with fresh keys; ✕ deletes the selected one.
+  repeats, style, look, key names and the teaching note. No saved recipes (tried and removed: the settings are quick
+  enough to set up).
+- Starter keys: major C, F, G, B♭, D; minor A, D, E, C.
 
 **Chart / PDF**
 - Four bars per line; each key's name sits **under its first bar** (iReal style), never in a side column.

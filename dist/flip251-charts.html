@@ -106,10 +106,8 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .rocker.prog button { flex: 1 1 auto; text-transform: none; letter-spacing: .01em; font: 600 15px var(--font-flap); padding: 8px 8px; }
 .rocker.wrap { flex-wrap: wrap; }
 .ctl.off .rocker, .ctl.off .field { pointer-events: none; }
-.quick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 8px; width: 100%; justify-self: stretch; align-items: stretch; }
-.quick .btn.slim { width: auto; }
+.quick { display: grid; width: 100%; justify-self: stretch; }
 .btn.surprise { background: linear-gradient(180deg, #f0bd62, var(--amber)); color: #4a3207; box-shadow: 0 3px 0 #7d5414, inset 0 1px 0 rgba(255,255,255,.5); }
-@media (max-width: 480px) { .quick { grid-template-columns: minmax(0, 1fr) auto auto; } .quick .surprise { grid-column: 1 / -1; } }
 .progrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; justify-self: stretch; }
 .progrow.two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 .custom { display: grid; gap: 6px; width: 100%; justify-self: stretch; }
@@ -213,9 +211,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       <span class="cap">Quick start</span>
       <div class="quick">
         <button class="btn slim surprise" id="surprise">Surprise me</button>
-        <select class="field" id="recipes" aria-label="Saved recipes"></select>
-        <button class="btn slim" id="saveRecipe">Save</button>
-        <button class="btn slim" id="delRecipe" aria-label="Delete this recipe">✕</button>
       </div>
     </div>
     <div class="ctl wide">
@@ -425,7 +420,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     random: { step: 0,  title: "Shuffled",     note: "shuffled" }
   };
   const PRESETS = {
-    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10] },
+    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10,2] },
     minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
   };
   /* progressions
@@ -457,7 +452,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     chordQ: "^7", custom: "", customKey: "auto", note: "", hideKeys: false,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
-  // copy any valid settings from a saved object onto the state (used on load and for saved recipes)
+  // copy any valid settings from a saved object onto the state (used on load)
   function applySettings(s) {
     if (!s || typeof s !== "object") return;
     if (PROGS[s.prog]) state.prog = s.prog;
@@ -968,50 +963,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     state.domV = pickOne(DOMS); state.domVI = pickOne(DOMS);
     state.chordQ = pickOne(Object.keys(CHORDQ));
     const s = sel(); state.start = pickOne(s);
-    $("title").value = ""; $("recipes").value = "";
+    $("title").value = "";
     changed(true);
     status("Surprise: " + defaultTitle().replace(/ \(.*\)$/, "") + ", " + ORDERS[state.order].note + ".");
   };
 
-  /* ---------- saved recipes: the whole setup under a name, kept on this device ---------- */
-  const RKEY = "chart251.recipes";
-  function loadRecipes() { try { const r = JSON.parse(localStorage.getItem(RKEY) || "[]"); return Array.isArray(r) ? r.filter(x => x && typeof x.name === "string" && x.s) : []; } catch (e) { return []; } }
-  function storeRecipes(list) { try { localStorage.setItem(RKEY, JSON.stringify(list)); return true; } catch (e) { return false; } }
-  function renderRecipes(selected) {
-    const list = loadRecipes(), r = $("recipes");
-    // the first line is only a label: disabled and hidden so it isn't offered as a choice in the picker
-    r.innerHTML = '<option value="" disabled hidden>' + (list.length ? "Saved recipes (" + list.length + ")" : "No saved recipes yet") + "</option>" +
-      list.map((x, i) => '<option value="' + i + '"></option>').join("");
-    list.forEach((x, i) => r.options[i + 1].textContent = x.name);
-    r.value = selected != null && selected >= 0 ? String(selected) : "";
-    $("delRecipe").disabled = r.value === "";
-  }
-  $("saveRecipe").onclick = () => {
-    const name = chartTitle(), list = loadRecipes();
-    const entry = { name, title: $("title").value.trim(), s: snapshot() };
-    let i = list.findIndex(x => x.name === name);
-    if (i >= 0) list[i] = entry; else { list.push(entry); i = list.length - 1; }
-    if (!storeRecipes(list)) { status("Couldn't save on this device."); return; }
-    renderRecipes(i);
-    status("Saved \u201c" + name + "\u201d." + ($("title").value.trim() ? "" : " To name a recipe, type a Chart title first."));
-  };
-  $("recipes").onchange = e => {
-    const list = loadRecipes(), x = list[Number(e.target.value)];
-    $("delRecipe").disabled = !x;
-    if (!x) return;
-    applySettings(x.s); customParsed = parseCustom(state.custom);
-    $("title").value = x.title || "";
-    $("custom").value = state.custom; $("noteBox").value = state.note;
-    changed(true);
-    status("Loaded \u201c" + x.name + "\u201d with fresh keys.");
-  };
-  $("delRecipe").onclick = () => {
-    const list = loadRecipes(), i = Number($("recipes").value);
-    if ($("recipes").value === "" || !list[i]) return;
-    const gone = list.splice(i, 1)[0];
-    storeRecipes(list); renderRecipes(-1);
-    status("Deleted \u201c" + gone.name + "\u201d. Tap Save to put it back.");
-  };
 
   // Shuffle again re-deals everything; while cycling it also picks a new starting key
   $("reshuffle").onclick = () => {
@@ -1329,7 +1285,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   };
 
   renderChips();
-  renderRecipes(-1);
   deal();
   render();
   // redraw once the fonts arrive, and when the window changes width

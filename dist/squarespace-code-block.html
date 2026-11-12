@@ -91,10 +91,8 @@ select.field { appearance: none; background-image: linear-gradient(45deg, transp
 .rocker.prog button { flex: 1 1 auto; text-transform: none; letter-spacing: .01em; font: 600 15px var(--font-flap); padding: 8px 8px; }
 .rocker.wrap { flex-wrap: wrap; }
 .ctl.off .rocker, .ctl.off .field { pointer-events: none; }
-.quick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 8px; width: 100%; justify-self: stretch; align-items: stretch; }
-.quick .btn.slim { width: auto; }
+.quick { display: grid; width: 100%; justify-self: stretch; }
 .btn.surprise { background: linear-gradient(180deg, #f0bd62, var(--amber)); color: #4a3207; box-shadow: 0 3px 0 #7d5414, inset 0 1px 0 rgba(255,255,255,.5); }
-@media (max-width: 480px) { .quick { grid-template-columns: minmax(0, 1fr) auto auto; } .quick .surprise { grid-column: 1 / -1; } }
 .progrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; justify-self: stretch; }
 .progrow.two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 .custom { display: grid; gap: 6px; width: 100%; justify-self: stretch; }
@@ -195,9 +193,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       &lt;span class=&quot;cap&quot;&gt;Quick start&lt;/span&gt;
       &lt;div class=&quot;quick&quot;&gt;
         &lt;button class=&quot;btn slim surprise&quot; id=&quot;surprise&quot;&gt;Surprise me&lt;/button&gt;
-        &lt;select class=&quot;field&quot; id=&quot;recipes&quot; aria-label=&quot;Saved recipes&quot;&gt;&lt;/select&gt;
-        &lt;button class=&quot;btn slim&quot; id=&quot;saveRecipe&quot;&gt;Save&lt;/button&gt;
-        &lt;button class=&quot;btn slim&quot; id=&quot;delRecipe&quot; aria-label=&quot;Delete this recipe&quot;&gt;&amp;#10005;&lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
     &lt;div class=&quot;ctl wide&quot;&gt;
@@ -407,7 +402,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     random: { step: 0,  title: &quot;Shuffled&quot;,     note: &quot;shuffled&quot; }
   };
   const PRESETS = {
-    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10] },
+    major: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [0,5,7,10,2] },
     minor: { all: [0,1,2,3,4,5,6,7,8,9,10,11], start: [9,2,4,0] }
   };
   /* progressions
@@ -439,7 +434,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     chordQ: &quot;^7&quot;, custom: &quot;&quot;, customKey: &quot;auto&quot;, note: &quot;&quot;, hideKeys: false,
     sel: { major: PRESETS.major.all.slice(), minor: PRESETS.minor.all.slice() }
   };
-  // copy any valid settings from a saved object onto the state (used on load and for saved recipes)
+  // copy any valid settings from a saved object onto the state (used on load)
   function applySettings(s) {
     if (!s || typeof s !== &quot;object&quot;) return;
     if (PROGS[s.prog]) state.prog = s.prog;
@@ -950,50 +945,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     state.domV = pickOne(DOMS); state.domVI = pickOne(DOMS);
     state.chordQ = pickOne(Object.keys(CHORDQ));
     const s = sel(); state.start = pickOne(s);
-    $(&quot;title&quot;).value = &quot;&quot;; $(&quot;recipes&quot;).value = &quot;&quot;;
+    $(&quot;title&quot;).value = &quot;&quot;;
     changed(true);
     status(&quot;Surprise: &quot; + defaultTitle().replace(/ \(.*\)$/, &quot;&quot;) + &quot;, &quot; + ORDERS[state.order].note + &quot;.&quot;);
   };
 
-  /* ---------- saved recipes: the whole setup under a name, kept on this device ---------- */
-  const RKEY = &quot;chart251.recipes&quot;;
-  function loadRecipes() { try { const r = JSON.parse(localStorage.getItem(RKEY) || &quot;[]&quot;); return Array.isArray(r) ? r.filter(x =&gt; x &amp;&amp; typeof x.name === &quot;string&quot; &amp;&amp; x.s) : []; } catch (e) { return []; } }
-  function storeRecipes(list) { try { localStorage.setItem(RKEY, JSON.stringify(list)); return true; } catch (e) { return false; } }
-  function renderRecipes(selected) {
-    const list = loadRecipes(), r = $(&quot;recipes&quot;);
-    // the first line is only a label: disabled and hidden so it isn&#x27;t offered as a choice in the picker
-    r.innerHTML = &#x27;&lt;option value=&quot;&quot; disabled hidden&gt;&#x27; + (list.length ? &quot;Saved recipes (&quot; + list.length + &quot;)&quot; : &quot;No saved recipes yet&quot;) + &quot;&lt;/option&gt;&quot; +
-      list.map((x, i) =&gt; &#x27;&lt;option value=&quot;&#x27; + i + &#x27;&quot;&gt;&lt;/option&gt;&#x27;).join(&quot;&quot;);
-    list.forEach((x, i) =&gt; r.options[i + 1].textContent = x.name);
-    r.value = selected != null &amp;&amp; selected &gt;= 0 ? String(selected) : &quot;&quot;;
-    $(&quot;delRecipe&quot;).disabled = r.value === &quot;&quot;;
-  }
-  $(&quot;saveRecipe&quot;).onclick = () =&gt; {
-    const name = chartTitle(), list = loadRecipes();
-    const entry = { name, title: $(&quot;title&quot;).value.trim(), s: snapshot() };
-    let i = list.findIndex(x =&gt; x.name === name);
-    if (i &gt;= 0) list[i] = entry; else { list.push(entry); i = list.length - 1; }
-    if (!storeRecipes(list)) { status(&quot;Couldn&#x27;t save on this device.&quot;); return; }
-    renderRecipes(i);
-    status(&quot;Saved \u201c&quot; + name + &quot;\u201d.&quot; + ($(&quot;title&quot;).value.trim() ? &quot;&quot; : &quot; To name a recipe, type a Chart title first.&quot;));
-  };
-  $(&quot;recipes&quot;).onchange = e =&gt; {
-    const list = loadRecipes(), x = list[Number(e.target.value)];
-    $(&quot;delRecipe&quot;).disabled = !x;
-    if (!x) return;
-    applySettings(x.s); customParsed = parseCustom(state.custom);
-    $(&quot;title&quot;).value = x.title || &quot;&quot;;
-    $(&quot;custom&quot;).value = state.custom; $(&quot;noteBox&quot;).value = state.note;
-    changed(true);
-    status(&quot;Loaded \u201c&quot; + x.name + &quot;\u201d with fresh keys.&quot;);
-  };
-  $(&quot;delRecipe&quot;).onclick = () =&gt; {
-    const list = loadRecipes(), i = Number($(&quot;recipes&quot;).value);
-    if ($(&quot;recipes&quot;).value === &quot;&quot; || !list[i]) return;
-    const gone = list.splice(i, 1)[0];
-    storeRecipes(list); renderRecipes(-1);
-    status(&quot;Deleted \u201c&quot; + gone.name + &quot;\u201d. Tap Save to put it back.&quot;);
-  };
 
   // Shuffle again re-deals everything; while cycling it also picks a new starting key
   $(&quot;reshuffle&quot;).onclick = () =&gt; {
@@ -1311,7 +1267,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   };
 
   renderChips();
-  renderRecipes(-1);
   deal();
   render();
   // redraw once the fonts arrive, and when the window changes width
