@@ -217,7 +217,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
             &lt;option value=&quot;lady&quot;&gt;Lady Bird &amp;#183; I&amp;#8211;&amp;#9837;III7&amp;#8211;&amp;#9837;VI&amp;#8211;&amp;#9837;II7&lt;/option&gt;
           &lt;/optgroup&gt;
           &lt;optgroup label=&quot;Drills&quot;&gt;
-            &lt;option value=&quot;dom&quot;&gt;Dominants only&lt;/option&gt;
             &lt;option value=&quot;one&quot;&gt;One chord quality&lt;/option&gt;
           &lt;/optgroup&gt;
           &lt;optgroup label=&quot;Your own&quot;&gt;
@@ -439,7 +438,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &quot;3b325&quot;: { name: &quot;iii-biii dim-ii-V&quot;,    q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: null },
     &quot;1s125&quot;: { name: &quot;I-#I dim-ii-V&quot;,        q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;V7&quot;,  vi: null },
     &quot;lady&quot;:  { name: &quot;Lady Bird Turnaround&quot;, q: &quot;major&quot;,  bars: [4, 2], turn: false, v: &quot;&amp;#9837;II7&quot;, vi: &quot;&amp;#9837;III7&quot; },
-    &quot;dom&quot;:   { name: &quot;Dominants Only&quot;,       q: &quot;none&quot;,   bars: [2, 1], turn: false, v: &quot;Dominant&quot;, vi: null },
     &quot;one&quot;:   { name: &quot;&quot;,                     q: &quot;none&quot;,   bars: [2, 1], turn: false, v: null,  vi: null },
     &quot;custom&quot;:{ name: &quot;Custom&quot;,               q: &quot;choose&quot;, bars: null,   turn: false, v: &quot;Dominant&quot;, vi: null }
   };
@@ -485,6 +483,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if ([&quot;dark&quot;,&quot;light&quot;].includes(s.pdf)) state.pdf = s.pdf;
     if ([&quot;flat&quot;,&quot;sharp&quot;].includes(s.acc)) state.acc = s.acc;
     if (CHORDQ[s.chordQ]) state.chordQ = s.chordQ;
+    if (s.prog === &quot;dom&quot;) { state.prog = &quot;one&quot;; state.chordQ = &quot;7&quot;; }      // &quot;Dominants only&quot; became One chord quality &amp;#8594; 7
     if (typeof s.custom === &quot;string&quot;) state.custom = s.custom.slice(0, 200);
     if (typeof s.customKey === &quot;string&quot; &amp;&amp; /^(auto|\d{1,2}[Mm])$/.test(s.customKey)) state.customKey = s.customKey;
     if (typeof s.note === &quot;string&quot;) state.note = s.note.slice(0, 120);
@@ -703,10 +702,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       case &quot;lady&quot;: {                                          // Lady Bird: Cmaj7 E&amp;#9837;7 A&amp;#9837;maj7 D&amp;#9837;7
         const bIII = r(2, 3) + dq(&quot;vi&quot;, false);
         return four(I, bIII, r(5, 8) + &quot;^7&quot;, r(1, 1) + dq(&quot;v&quot;, false));
-      }
-      case &quot;dom&quot;: {                                           // one dominant per key; the Order menu moves it
-        const ch = r(0, 0) + dq(&quot;v&quot;, false);
-        return long ? [[ch], [&quot;x&quot;]] : [[ch]];
       }
       case &quot;one&quot;: {
         const ch = r(0, 0) + state.chordQ;

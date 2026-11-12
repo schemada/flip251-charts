@@ -26,13 +26,13 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
 - Progressions are one grouped menu (keep this order and grouping):
   ii–V–I: ii–V–I, ii–V. ii–V variations: Tritone sub ii–♭II7–I, Major ii–V → minor i, Minor ii–V → major I,
   Backdoor iv–♭VII7–I. Turnarounds: I–VI–ii–V, iii–VI–ii–V, iii–♭iii°–ii–V, I–♯I°–ii–V, Lady Bird
-  (I–♭III7–♭VImaj7–♭II7). Drills: Dominants only (one dominant per key; the Order menu moves it — never call these
-  "dominant chains"), One chord quality (for random-root practice): a curated everyday set in
+  (I–♭III7–♭VImaj7–♭II7). Drills: One chord quality (Dominants only was removed once all the dominant qualities were
+  in this menu; old saves become One chord quality → 7) (for random-root practice): a curated everyday set in
   groups — Triads: major, min, dim, aug, sus4 · Major: maj7, maj9, maj13, 6, 6/9, maj7♯11, maj7♯5 · Minor: min7, min9, min11, min6, min(maj7) · Dominant: 7, 9,
   13, 7♭9, 7♯9, 7♯11, 7♭13, 7♯5, 7alt · Sus: 7sus4, 9sus4, 7♭9sus4 · Diminished: min7♭5, min9♭5, dim7 (list in
   `CHORD_GROUPS`). Not overloaded, nothing obscure. iReal has no min13, so it's left out.
   Your own: Custom progression. Quality (Major/Minor) applies to ii–V–I, ii–V, tritone sub and custom; the rest
-  are fixed. Drills have no key names (the chord names its root). No colour moves or whole forms (blues, rhythm
+  are fixed. The One chord drill has no key names (the chord names its root). No colour moves or whole forms (blues, rhythm
   changes) — the owner left those out for now.
 - Custom progression: roman numerals over the key, always counted from the major scale; bars split by "|",
   up to 4 chords a bar, up to 16 bars, "%" repeats a bar. Bare numerals: lowercase –7 (vii ø7), uppercase 7,

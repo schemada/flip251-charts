@@ -227,7 +227,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
             <option value="lady">Lady Bird · I–♭III7–♭VI–♭II7</option>
           </optgroup>
           <optgroup label="Drills">
-            <option value="dom">Dominants only</option>
             <option value="one">One chord quality</option>
           </optgroup>
           <optgroup label="Your own">
@@ -449,7 +448,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     "3b325": { name: "iii-biii dim-ii-V",    q: "major",  bars: [4, 2], turn: false, v: "V7",  vi: null },
     "1s125": { name: "I-#I dim-ii-V",        q: "major",  bars: [4, 2], turn: false, v: "V7",  vi: null },
     "lady":  { name: "Lady Bird Turnaround", q: "major",  bars: [4, 2], turn: false, v: "♭II7", vi: "♭III7" },
-    "dom":   { name: "Dominants Only",       q: "none",   bars: [2, 1], turn: false, v: "Dominant", vi: null },
     "one":   { name: "",                     q: "none",   bars: [2, 1], turn: false, v: null,  vi: null },
     "custom":{ name: "Custom",               q: "choose", bars: null,   turn: false, v: "Dominant", vi: null }
   };
@@ -495,6 +493,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     if (["dark","light"].includes(s.pdf)) state.pdf = s.pdf;
     if (["flat","sharp"].includes(s.acc)) state.acc = s.acc;
     if (CHORDQ[s.chordQ]) state.chordQ = s.chordQ;
+    if (s.prog === "dom") { state.prog = "one"; state.chordQ = "7"; }      // "Dominants only" became One chord quality → 7
     if (typeof s.custom === "string") state.custom = s.custom.slice(0, 200);
     if (typeof s.customKey === "string" && /^(auto|\d{1,2}[Mm])$/.test(s.customKey)) state.customKey = s.customKey;
     if (typeof s.note === "string") state.note = s.note.slice(0, 120);
@@ -713,10 +712,6 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
       case "lady": {                                          // Lady Bird: Cmaj7 E♭7 A♭maj7 D♭7
         const bIII = r(2, 3) + dq("vi", false);
         return four(I, bIII, r(5, 8) + "^7", r(1, 1) + dq("v", false));
-      }
-      case "dom": {                                           // one dominant per key; the Order menu moves it
-        const ch = r(0, 0) + dq("v", false);
-        return long ? [[ch], ["x"]] : [[ch]];
       }
       case "one": {
         const ch = r(0, 0) + state.chordQ;
