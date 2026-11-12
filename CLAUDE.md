@@ -28,7 +28,7 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   Backdoor iv–♭VII7–I. Turnarounds: I–VI–ii–V, iii–VI–ii–V, iii–♭iii°–ii–V, I–♯I°–ii–V, Lady Bird
   (I–♭III7–♭VImaj7–♭II7). Drills: Dominants only (one dominant per key; the Order menu moves it — never call these
   "dominant chains"), One chord quality (for random-root practice): a curated everyday set in
-  groups — Major: maj7, maj9, maj13, 6, 6/9, maj7♯11, maj7♯5 · Minor: min7, min9, min11, min6, min(maj7) · Dominant: 7, 9,
+  groups — Triads: major, min, dim, aug, sus4 · Major: maj7, maj9, maj13, 6, 6/9, maj7♯11, maj7♯5 · Minor: min7, min9, min11, min6, min(maj7) · Dominant: 7, 9,
   13, 7♭9, 7♯9, 7♯11, 7♭13, 7♯5, 7alt · Sus: 7sus4, 9sus4, 7♭9sus4 · Diminished: min7♭5, min9♭5, dim7 (list in
   `CHORD_GROUPS`). Not overloaded, nothing obscure. iReal has no min13, so it's left out.
   Your own: Custom progression. Quality (Major/Minor) applies to ii–V–I, ii–V, tritone sub and custom; the rest

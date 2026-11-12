@@ -443,9 +443,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     &quot;one&quot;:   { name: &quot;&quot;,                     q: &quot;none&quot;,   bars: [2, 1], turn: false, v: null,  vi: null },
     &quot;custom&quot;:{ name: &quot;Custom&quot;,               q: &quot;choose&quot;, bars: null,   turn: false, v: &quot;Dominant&quot;, vi: null }
   };
-  /* One chord quality: the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
+  /* One chord quality: triads plus the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
      Only qualities iReal Pro can spell and play (it has no min13, so that one is left out). */
   const CHORD_GROUPS = [
+    [&quot;Triads&quot;, [[&quot;&quot;, &quot;major&quot;, &quot;Major Triads&quot;], [&quot;-&quot;, &quot;min (&amp;#8211;)&quot;, &quot;Minor Triads&quot;], [&quot;o&quot;, &quot;dim (&amp;#176;)&quot;, &quot;Diminished Triads&quot;],
+                [&quot;+&quot;, &quot;aug (+)&quot;, &quot;Augmented Triads&quot;], [&quot;sus&quot;, &quot;sus4&quot;, &quot;Sus4 Triads&quot;]]],
     [&quot;Major&quot;, [[&quot;^7&quot;, &quot;maj7 (&amp;#916;7)&quot;, &quot;Maj7&quot;], [&quot;^9&quot;, &quot;maj9 (&amp;#916;9)&quot;, &quot;Maj9&quot;], [&quot;^13&quot;, &quot;maj13 (&amp;#916;13)&quot;, &quot;Maj13&quot;], [&quot;6&quot;, &quot;6&quot;, &quot;Major 6&quot;],
                [&quot;69&quot;, &quot;6/9&quot;, &quot;6/9&quot;], [&quot;^7#11&quot;, &quot;maj7&amp;#9839;11 (&amp;#916;7&amp;#9839;11)&quot;, &quot;Maj7#11&quot;], [&quot;^7#5&quot;, &quot;maj7&amp;#9839;5 (&amp;#916;7&amp;#9839;5)&quot;, &quot;Maj7#5&quot;]]],
     [&quot;Minor&quot;, [[&quot;-7&quot;, &quot;min7 (&amp;#8211;7)&quot;, &quot;Min7&quot;], [&quot;-9&quot;, &quot;min9 (&amp;#8211;9)&quot;, &quot;Min9&quot;], [&quot;-11&quot;, &quot;min11 (&amp;#8211;11)&quot;, &quot;Min11&quot;],
@@ -814,7 +816,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   function defaultTitle() {
     const p = P();
-    const name = state.prog === &quot;one&quot; ? CHORDQ[state.chordQ] + &quot; Chords&quot; : p.name;
+    const name = state.prog === &quot;one&quot; ? CHORDQ[state.chordQ] + (/Triads$/.test(CHORDQ[state.chordQ]) ? &quot;&quot; : &quot; Chords&quot;) : p.name;
     const q = p.q === &quot;choose&quot; ? (isMinor() ? &quot; Minor&quot; : &quot; Major&quot;) : &quot;&quot;;
     const len = p.bars ? &quot; &quot; + (state.short ? &quot;Short&quot; : &quot;Long&quot;) : &quot;&quot;;
     return name + q + len + &quot; (&quot; + ORDERS[state.order].title + &quot;)&quot;;

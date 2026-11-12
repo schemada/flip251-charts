@@ -453,9 +453,11 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     "one":   { name: "",                     q: "none",   bars: [2, 1], turn: false, v: null,  vi: null },
     "custom":{ name: "Custom",               q: "choose", bars: null,   turn: false, v: "Dominant", vi: null }
   };
-  /* One chord quality: the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
+  /* One chord quality: triads plus the everyday jazz qualities, grouped by type. Each is [iReal quality, menu label, title name].
      Only qualities iReal Pro can spell and play (it has no min13, so that one is left out). */
   const CHORD_GROUPS = [
+    ["Triads", [["", "major", "Major Triads"], ["-", "min (–)", "Minor Triads"], ["o", "dim (°)", "Diminished Triads"],
+                ["+", "aug (+)", "Augmented Triads"], ["sus", "sus4", "Sus4 Triads"]]],
     ["Major", [["^7", "maj7 (Δ7)", "Maj7"], ["^9", "maj9 (Δ9)", "Maj9"], ["^13", "maj13 (Δ13)", "Maj13"], ["6", "6", "Major 6"],
                ["69", "6/9", "6/9"], ["^7#11", "maj7♯11 (Δ7♯11)", "Maj7#11"], ["^7#5", "maj7♯5 (Δ7♯5)", "Maj7#5"]]],
     ["Minor", [["-7", "min7 (–7)", "Min7"], ["-9", "min9 (–9)", "Min9"], ["-11", "min11 (–11)", "Min11"],
@@ -824,7 +826,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
   }
   function defaultTitle() {
     const p = P();
-    const name = state.prog === "one" ? CHORDQ[state.chordQ] + " Chords" : p.name;
+    const name = state.prog === "one" ? CHORDQ[state.chordQ] + (/Triads$/.test(CHORDQ[state.chordQ]) ? "" : " Chords") : p.name;
     const q = p.q === "choose" ? (isMinor() ? " Minor" : " Major") : "";
     const len = p.bars ? " " + (state.short ? "Short" : "Long") : "";
     return name + q + len + " (" + ORDERS[state.order].title + ")";
