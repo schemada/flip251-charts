@@ -91,6 +91,13 @@ iReal Pro, or save it as a PDF / image. Live at https://schemada.github.io/flip2
   Tempo (BPM) box: blank = iReal's default, else 40–400. Instruments (Rhodes, strings bass, quieter drums) can't be
   set from a link — they live in iReal's mixer.
 
+**Quick tour**
+- Shown once on a first visit (only where localStorage works, so it never repeats on every load), and again from
+  the small "? Tour" button in the top plate (just "?" on phones). 8 steps, each lighting up one part of the page
+  with a dimmed backdrop and a dark card (Back / Next / Skip, dots; Esc and arrow keys work): welcome (intro line),
+  Surprise me, Progression, Order (+ Start on), Keys, iReal style (+ tempo), the chart (press-and-hold), the action
+  buttons. Copy lives in `TOUR`. Positioned in page coordinates so it also works inside the Squarespace iframe.
+
 **Copy and layout**
 - Intro: "Design a custom exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF."
 - Never mention Claude or AI in the page. Settings sit two per row on phones, three on tablet portrait, and

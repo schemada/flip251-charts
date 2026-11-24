@@ -52,6 +52,29 @@ button { -webkit-user-select: none; user-select: none; touch-action: manipulatio
 .plate { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px; }
 .brand { font: 700 15px var(--font-flap); letter-spacing: .32em; color: var(--label); text-transform: uppercase; }
 .model { font: 500 10px var(--font-label); letter-spacing: .14em; color: var(--label); opacity: .75; }
+.plate-r { display: inline-flex; align-items: baseline; gap: 10px; }
+.tourbtn { font: 600 9.5px var(--font-label); letter-spacing: .12em; text-transform: uppercase; color: var(--label);
+  background: transparent; border: 1px solid var(--cap-edge); border-radius: 999px; padding: 3px 9px; cursor: pointer; }
+.tourbtn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (max-width: 480px) { .tourbtn .tw { display: none; } .tourbtn { padding: 2px 7px; } }
+/* quick tour: a dimmed page with one control lit up and a small card beside it */
+.tour-shade { position: absolute; left: 0; top: 0; width: 100%; z-index: 50; }
+.tour-spot { position: absolute; z-index: 51; border-radius: 12px; pointer-events: none;
+  box-shadow: 0 0 0 200vmax rgba(20, 18, 15, .62); outline: 2px solid var(--amber); outline-offset: 3px;
+  transition: top .3s ease, left .3s ease, width .3s ease, height .3s ease; }
+.tour-card { position: absolute; z-index: 52; width: min(340px, calc(100vw - 32px)); box-sizing: border-box;
+  background: var(--bezel); color: var(--ink); border-radius: 14px; padding: 16px 16px 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .45); transition: top .3s ease, left .3s ease; }
+.tour-card h3 { font: 700 21px/1.1 var(--font-flap); color: var(--amber); margin: 0 0 6px; letter-spacing: .02em; }
+.tour-card p { font: 500 12px/1.55 var(--font-label); margin: 0 0 14px; color: var(--ink); }
+.tour-nav { display: flex; align-items: center; gap: 8px; }
+.tour-dots { flex: 1; display: flex; gap: 5px; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: #5a5347; }
+.tour-dots i.on { background: var(--amber); }
+.tour-card .btn.slim { width: auto; }
+.tour-skip { font: 600 10px var(--font-label); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim);
+  background: none; border: 0; padding: 8px 4px; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .tour-spot, .tour-card { transition: none; } }
 .lede { margin: -8px 6px 0; font: 500 12px/1.55 var(--font-label); color: var(--label); max-width: 60ch; }
 
 /* ---------- controls ---------- */
@@ -195,7 +218,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
 </style>
 
 <div class="case">
-  <div class="plate"><span class="brand">ii · V · I → iReal</span><span class="model">251 CHARTS</span></div>
+  <div class="plate"><span class="brand">ii · V · I → iReal</span><span class="plate-r"><button class="tourbtn" id="tourBtn" type="button" aria-label="Show the quick tour">?<span class="tw"> Tour</span></button><span class="model">251 CHARTS</span></span></div>
   <p class="lede">Design a custom exercise with basic chord progressions, then send it to iReal Pro or save it as a PDF.</p>
 
   <div class="grid" aria-label="Settings">
@@ -380,7 +403,7 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     <button class="btn" id="dl">Download PDF</button>
   </div>
   <p class="status" id="status" role="status"></p>
-  <p class="note"><b>Getting it into iReal Pro:</b> on a phone or tablet with iReal Pro installed, tap <b>Open in iReal Pro</b>. If nothing happens, tap <b>Copy iReal link</b>, paste it into your browser's address bar and go. Set your tempo in iReal Pro after importing. <b>Download PDF</b> saves a printable lead sheet of the same chart. You can also press and hold the chart to save it as an image.</p>
+  <p class="note"><b>Getting it into iReal Pro:</b> on a phone or tablet with iReal Pro installed, tap <b>Open in iReal Pro</b>. If nothing happens, tap <b>Copy iReal link</b>, paste it into your browser's address bar and go. The style and tempo you pick come along with the chart; instruments are set in iReal Pro's mixer. <b>Download PDF</b> saves a printable lead sheet of the same chart. You can also press and hold the chart to save it as an image.</p>
   <details class="raw"><summary>Show the iReal link</summary><textarea class="field" id="link" readonly aria-label="iReal Pro link"></textarea></details>
   </div>
 </div>
@@ -1352,6 +1375,94 @@ textarea.field { font: 500 10.5px/1.45 var(--font-label); height: 64px; resize: 
     } catch (e) { status("Couldn't make the PDF. Check your connection and try again."); }
     btn.disabled = false;
   };
+
+  /* ---------- quick tour: shown once on first visit, and again from "? Tour" ---------- */
+  const TOUR = [
+    { el: () => document.querySelector(".lede"), t: "Welcome to 251 Charts",
+      p: "Build a practice chart that runs through the keys, then play it in iReal Pro or print it. Here's a quick look around." },
+    { el: () => $("surprise").closest(".ctl"), t: "In a hurry?",
+      p: "Surprise me builds a random exercise in one tap. Everything below stays yours to change." },
+    { el: () => $("prog").closest(".ctl"), t: "Pick what to practice",
+      p: "ii–V–I and its variations, turnarounds, one chord quality on every root, or type your own chords in any key." },
+    { el: () => $("order").closest(".ctl"), t: "Choose the route",
+      p: "Cycle of 4ths or 5ths, steps, 3rds, tritones, or shuffled. Start on (next to it) picks the first key." },
+    { el: () => $("chips").closest(".ctl"), t: "Choose the keys",
+      p: "All 12, a starter set, or tap keys on and off. Flats / Sharps sets how the black-key keys are spelled." },
+    { el: () => $("style").closest(".ctl"), t: "How iReal plays it",
+      p: "Long Notes holds each chord so you can hear the harmony, or pick a comping feel. Add a tempo if you like." },
+    { el: () => document.querySelector(".window"), t: "Your chart",
+      p: "It updates as you change settings. Press and hold it to save it as an image." },
+    { el: () => document.querySelector(".actions"), t: "Play or print it",
+      p: "Open it in iReal Pro, copy the link, or download a PDF. You can bring this tour back any time with the ? button at the top." }
+  ];
+  const TOUR_KEY = "chart251.tour";
+  let tourIdx = -1, tourBox = null;
+  function tourPlace() {
+    if (tourIdx < 0) return;
+    const target = TOUR[tourIdx].el(), spot = tourBox.querySelector(".tour-spot"), card = tourBox.querySelector(".tour-card");
+    const doc = document.documentElement, sx = window.scrollX, sy = window.scrollY;
+    tourBox.querySelector(".tour-shade").style.height = Math.max(doc.scrollHeight, window.innerHeight) + "px";
+    const r = target.getBoundingClientRect(), m = 6;
+    Object.assign(spot.style, { left: r.left + sx - m + "px", top: r.top + sy - m + "px", width: r.width + 2 * m + "px", height: r.height + 2 * m + "px" });
+    // the card goes below the lit control if it fits on screen, else above it, else at the bottom of the screen
+    const vw = doc.clientWidth, vh = window.innerHeight, cw = card.offsetWidth, ch = card.offsetHeight, gap = 14;
+    let top = r.bottom + m + gap;
+    if (top + ch > vh - 8) top = r.top - m - gap - ch >= 8 ? r.top - m - gap - ch : vh - ch - 12;
+    const left = Math.min(Math.max(16, r.left + r.width / 2 - cw / 2), vw - cw - 16);
+    card.style.top = top + sy + "px"; card.style.left = left + sx + "px";
+  }
+  function tourShow(i) {
+    tourIdx = i;
+    const st = TOUR[i], card = tourBox.querySelector(".tour-card");
+    card.querySelector("h3").textContent = st.t;
+    card.querySelector("p").textContent = st.p;
+    card.querySelector(".tour-dots").innerHTML = TOUR.map((_, k) => '<i class="' + (k === i ? "on" : "") + '"></i>').join("");
+    card.querySelector(".tour-back").hidden = i === 0;
+    card.querySelector(".tour-next").textContent = i === TOUR.length - 1 ? "Done" : "Next";
+    card.querySelector(".tour-skip").hidden = i === TOUR.length - 1;
+    const target = st.el(), r = target.getBoundingClientRect();
+    if (r.top < 70 || r.bottom > window.innerHeight - 200) target.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    tourPlace(); setTimeout(tourPlace, 380);
+    card.querySelector(".tour-next").focus({ preventScroll: true });
+  }
+  function tourEnd() {
+    tourIdx = -1;
+    if (tourBox) { tourBox.remove(); tourBox = null; }
+    try { localStorage.setItem(TOUR_KEY, "done"); } catch (e) {}
+    $("tourBtn").focus({ preventScroll: true });
+  }
+  function tourStart() {
+    if (tourBox) tourBox.remove();
+    tourBox = document.createElement("div");
+    tourBox.innerHTML = '<div class="tour-shade"></div><div class="tour-spot"></div>' +
+      '<div class="tour-card" role="dialog" aria-modal="true" aria-label="Quick tour"><h3></h3><p></p>' +
+      '<div class="tour-nav"><div class="tour-dots" aria-hidden="true"></div>' +
+      '<button class="tour-skip" type="button">Skip</button><button class="btn slim tour-back" type="button">Back</button>' +
+      '<button class="btn slim primary tour-next" type="button">Next</button></div></div>';
+    document.body.appendChild(tourBox);
+    tourBox.querySelector(".tour-skip").onclick = tourEnd;
+    tourBox.querySelector(".tour-back").onclick = () => tourShow(Math.max(0, tourIdx - 1));
+    tourBox.querySelector(".tour-next").onclick = () => tourIdx >= TOUR.length - 1 ? tourEnd() : tourShow(tourIdx + 1);
+    tourShow(0);
+  }
+  $("tourBtn").onclick = tourStart;
+  let tourRaf = 0;
+  const tourFollow = () => { if (tourIdx < 0) return; cancelAnimationFrame(tourRaf); tourRaf = requestAnimationFrame(tourPlace); };
+  window.addEventListener("resize", tourFollow);
+  window.addEventListener("scroll", tourFollow, { passive: true });
+  document.addEventListener("keydown", e => {
+    if (tourIdx < 0) return;
+    if (e.key === "Escape") tourEnd();
+    else if (e.key === "ArrowRight") tourBox.querySelector(".tour-next").click();
+    else if (e.key === "ArrowLeft" && tourIdx > 0) tourShow(tourIdx - 1);
+  });
+  // first visit only (and only where the "seen it" note can be kept, so it never nags on every load)
+  try {
+    if (!localStorage.getItem(TOUR_KEY)) {
+      localStorage.setItem(TOUR_KEY, "shown");
+      if (localStorage.getItem(TOUR_KEY) === "shown") setTimeout(() => { if (tourIdx < 0 && !tourBox) tourStart(); }, 700);
+    }
+  } catch (e) {}
 
   $("chordQ").innerHTML = CHORD_GROUPS.map(([label, list]) => '<optgroup label="' + label + '">' +
     list.map(([q, text]) => '<option value="' + q + '">' + text + "</option>").join("") + "</optgroup>").join("");
